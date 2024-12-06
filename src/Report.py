@@ -1,20 +1,28 @@
-#please check
 class Report:
-    def __init__(self, report_id: int, report_details: str):
+    def __init__(self, report_id: int, resource_id: int, detail: str, created_at: str = None):
+        """
+        Inisialisasi laporan baru.
+        :param report_id: ID laporan (unik).
+        :param resource_id: ID sumber daya terkait.
+        :param detail: Detail laporan.
+        :param created_at: Waktu pembuatan laporan (default: None, akan diambil dari database).
+        """
         self.report_id = report_id
-        self.report_details = report_details
+        self.resource_id = resource_id
+        self.detail = detail
+        self.created_at = created_at
 
     def get_report_detail(self):
-        return self.report_details
+        """Mengambil detail laporan."""
+        return self.detail
 
     def set_report_detail(self, new_details: str):
+        """Mengubah atau memperbarui detail laporan."""
         if not new_details:
             raise ValueError("Detail laporan tidak boleh kosong.")
-        self.report_details = new_details
+        self.detail = new_details
         return f"Detail laporan berhasil diperbarui."
 
-    def confirm_deletion(self):
-        return f"Laporan dengan ID '{self.report_id}' akan dihapus. Konfirmasi diperlukan."
-
     def __str__(self):
-        return f"ID Laporan: {self.report_id}\nDetail: {self.report_details}"
+        """Representasi string dari laporan."""
+        return f"ID Laporan: {self.report_id}, Resource ID: {self.resource_id}, Detail: {self.detail}, Created At: {self.created_at}"
