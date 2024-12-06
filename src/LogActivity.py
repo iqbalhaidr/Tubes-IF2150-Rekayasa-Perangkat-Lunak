@@ -1,3 +1,4 @@
+#please check
 class LogActivity:
     def __init__(self):
         self.log_entries = []

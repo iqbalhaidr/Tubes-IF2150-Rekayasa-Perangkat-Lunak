@@ -1,3 +1,4 @@
+#please check
 class Report:
     def __init__(self, report_id: int, report_details: str):
         self.report_id = report_id

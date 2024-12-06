@@ -1,5 +1,5 @@
 import sqlite3
-
+#please check
 class Inventaris:
     def __init__(self, db_name="SIMADA.db"):
         self.db_name = db_name
