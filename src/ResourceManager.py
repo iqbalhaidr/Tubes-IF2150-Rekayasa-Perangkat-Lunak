@@ -7,12 +7,12 @@ class ResourceManager:
     def connect(self):
         return sqlite3.connect(self.db_name)
 
-    def check_existing_resource(self, resourceName: str):
+    def check_existing_resource(self, resource_id: int):
         """Memeriksa apakah ada sumber daya dengan nama yang sama"""
         conn = self.connect()
         cur = conn.cursor()
         
-        cur.execute("SELECT * FROM Resources WHERE name = ?", (resourceName,))
+        cur.execute("SELECT * FROM Resources WHERE id = ?", (resource_id,))
         existing_resource = cur.fetchall()  
         
         conn.close()
@@ -65,12 +65,12 @@ class ResourceManager:
 
         conn.close()
 
-    def get_resource_quantity(self, name):
+    def get_resource_quantity(self, id):
         '''Mendapatkan quantity dari resource yang dipilih user'''
         conn = self.connect()
         cur = conn.cursor()
 
-        cur.execute("SELECT quantity FROM Resources WHERE name = ?", (name,))
+        cur.execute("SELECT quantity FROM Resources WHERE id = ?", (id,))
         resource_quantity = cur.fetchone()
 
         conn.close()

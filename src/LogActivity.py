@@ -8,18 +8,24 @@ class LogActivity:
         """Membuat koneksi ke database."""
         return sqlite3.connect(self.db_name)
 
-    def log_new_activity(self, resource_id: int, action_type: str, timestamp: str, jumlah: int, lokasi: str):
+    def log_new_activity(self, resource_id: int, action_type: str, timestamp: str, jumlah: int, lokasi: str, locate:bool):
         """Menambahkan log aktivitas ke database."""
         if jumlah <= 0:
             raise ValueError("Jumlah harus lebih besar dari nol.")
         
         conn = self.connect()
         cur = conn.cursor()
+        action_detail=""
+        if locate:
+            action_detail= action_type + " " + f"{jumlah}" + " to " + lokasi
+        else:
+            action_detail= action_type + " " + "Jumlah" + " Sumber Daya"
+
         try:
             cur.execute('''
-                INSERT INTO log_activity (resource_id, action_type, timestamp, jumlah, lokasi)
+                INSERT INTO log_activity (resource_id, activity, timestamp)
                 VALUES (?, ?, ?, ?, ?)
-            ''', (resource_id, action_type, timestamp, jumlah, lokasi))
+            ''', (resource_id, action_detail, timestamp))
             conn.commit()
         except sqlite3.Error as e:
             raise RuntimeError(f"Kesalahan saat menambahkan log aktivitas: {str(e)}")
