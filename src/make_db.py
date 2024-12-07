@@ -31,8 +31,8 @@ def create_tables():
         report_id INTEGER PRIMARY KEY,
         resource_id INTEGER,
         detail TEXT NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (resource_id) REFERENCES Resources(id) ON DELETE CASCADE
+        FOREIGN KEY (resource_id) REFERENCES Resources(id) ON DELETE CASCADE,
+        FOREIGN KEY (report_id) REFERENCES LogActivity(id) ON DELETE CASCADE
     )
     """)
 

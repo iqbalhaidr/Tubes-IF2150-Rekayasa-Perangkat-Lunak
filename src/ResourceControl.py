@@ -20,17 +20,17 @@ class ResourceControl:
         else:
             return f"Gagal menambahkan sumber daya '{resource_name}', mungkin sudah ada."
 
-    def update_resource_quantity(self, resource_name: str, new_quantity: int):
+    def update_resource_quantity(self, resource_id: int, new_quantity: int):
         """Memperbarui jumlah sumber daya."""
         if new_quantity <= 0:
             raise ValueError("Quantity baru harus lebih besar dari nol.")
         
-        existing_quantity = self.resource_manager.get_resource_quantity(resource_name)
+        existing_quantity = self.resource_manager.get_resource_quantity(resource_id)
         if existing_quantity is None:
-            return f"Sumber daya '{resource_name}' tidak ditemukan."
+            return f"Sumber daya '{resource_id}' tidak ditemukan."
         
         difference = new_quantity - existing_quantity[0]
         add = difference > 0
-        self.resource_manager.add_or_subtract_resource_quantity(resource_name, abs(difference), add)
-        self.log_activity.log_new_activity(resource_name, "Perubahan", "Now", abs(difference), "N/A")
-        return f"Jumlah sumber daya '{resource_name}' berhasil diperbarui ke {new_quantity}."
+        self.resource_manager.add_or_subtract_resource_quantity(resource_id, abs(difference), add)
+        self.log_activity.log_new_activity(resource_id, "Update", "Now", abs(difference), "N/A")
+        return f"Jumlah sumber daya '{resource_id}' berhasil diperbarui ke {new_quantity}."
