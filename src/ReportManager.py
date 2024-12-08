@@ -104,3 +104,17 @@ class ReportManager:
             raise RuntimeError(f"Kesalahan saat mengambil semua laporan: {str(e)}")
         finally:
             conn.close()
+
+    def check_existing_report(self, resource_id: int):
+        """ Mengecek apakah Resource sudah memiliki Report."""
+        conn = self.connect()
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT report_id, resource_id, detail, created_at
+            FROM reports
+            WHERE resource_id = ?
+        ''', (resource_id,))
+        report = cur.fetchall()
+        conn.close()
+
+        return len(report) > 0

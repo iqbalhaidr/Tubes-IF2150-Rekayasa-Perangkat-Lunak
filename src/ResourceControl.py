@@ -34,3 +34,17 @@ class ResourceControl:
         self.resource_manager.add_or_subtract_resource_quantity(resource_id, abs(difference), add)
         self.log_activity.log_new_activity(resource_id, "Update", "Now", abs(difference), "N/A")
         return f"Jumlah sumber daya '{resource_id}' berhasil diperbarui ke {new_quantity}."
+
+    def make_report(resource_id: int, reportDetails: str):
+        """Menambahkan report baru untuk resource jika belum ada report"""
+        isIDValid = self.resource_manager.check_existing_resource(resource_id)
+        isExistReport = self.report_manager.check_existing_report(resource_id)
+
+        if not isIDValid:
+            return f"Resource ID {resource_id} tidak dapat ditemukan."
+        
+        if isExistReport:
+            return f"Tidak dapat membuat report karena Resource ID {resource_id} sudah memiliki report, silahkan untuk mengupdate informasi jika diperlukan."
+        
+        message = self.report_manager.add_report(resource_id, reportDetails)
+        return message
