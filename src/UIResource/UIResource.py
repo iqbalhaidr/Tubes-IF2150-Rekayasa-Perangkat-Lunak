@@ -528,7 +528,7 @@ class UIResource:
         DistributeWindow.config(bg='#2F0160')
         DistributeWindow.geometry("510x265")
         
-        inputFieldBG = tk.PhotoImage(file="../img/inputField.png")
+        inputFieldBG = tk.PhotoImage(file="img/inputField.png")
         LocationEntry = InventoryLocation
 
         headerPage = tk.Label(DistributeWindow, 
@@ -604,9 +604,9 @@ class UIResource:
             widget.destroy()
 
         # Tambahkan konten inventaris
-        self.bgImage = PhotoImage(file="../img/barInventory.png")
-        self.InventarisButton2Image = PhotoImage(file="../img/InventarisButton2.png")
-        self.reportButtonImage = PhotoImage(file="../img/reportButton.png")
+        self.bgImage = PhotoImage(file="img/barInventory.png")
+        self.InventarisButton2Image = PhotoImage(file="img/InventarisButton2.png")
+        self.reportButtonImage = PhotoImage(file="img/reportButton.png")
         
         LogActivities = [
             {"report":"Allocate 100 Vibranium to Jakarta"},
