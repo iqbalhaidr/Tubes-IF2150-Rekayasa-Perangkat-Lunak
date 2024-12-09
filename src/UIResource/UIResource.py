@@ -52,16 +52,16 @@ class UIResource:
         namaPage.pack(pady=(0, 6), anchor="center", padx=10)  # 
 
         # Menambahkan tombol 'Tambah Resource' di sisi kiri
-        self.loadImage = tk.PhotoImage(file="../img/tambahButton.png")  
+        self.loadImage = tk.PhotoImage(file="img/tambahButton.png")  
 
         self.tambahButton = tk.Button(self.firstPageScrollableFrame, image=self.loadImage, command=self.onButtonClick, bd=0, highlightthickness=0)
         self.tambahButton.pack(pady=20, anchor="w", padx=(50, 10))  
 
-        self.bgImage = PhotoImage(file="../img/bar.png")
-        self.allocateButtonImage = PhotoImage(file="../img/allocateButton.png")
-        self.deleteButton1Image = PhotoImage(file="../img/deleteButton1.png")
-        self.editButtonImage = PhotoImage(file="../img/editButton.png")
-        self.InventarisButtonImage = PhotoImage(file="../img/InventarisButton.png")
+        self.bgImage = PhotoImage(file="img/bar.png")
+        self.allocateButtonImage = PhotoImage(file="img/allocateButton.png")
+        self.deleteButton1Image = PhotoImage(file="img/deleteButton1.png")
+        self.editButtonImage = PhotoImage(file="img/editButton.png")
+        self.InventarisButtonImage = PhotoImage(file="img/InventarisButton.png")
         
         # DUMMY MAS
         resources = [
@@ -150,7 +150,7 @@ class UIResource:
         createWindow.geometry("510x310")  # Sesuaikan ukuran pop-up
 
         # Load gambar input field
-        inputFieldBG = tk.PhotoImage(file="../img/inputField.png")
+        inputFieldBG = tk.PhotoImage(file="img/inputField.png")
 
         # Header Form
         headerPage = tk.Label(createWindow, text="Create Resource", font=("Arial", 16, "bold"), bg='#2F0160', fg='white')
@@ -223,7 +223,7 @@ class UIResource:
         allocateWindow.geometry("510x265")
         
         # Load gambar input field
-        inputFieldBG = tk.PhotoImage(file="../img/inputField.png")
+        inputFieldBG = tk.PhotoImage(file="img/inputField.png")
         nameEntry = resource_name
 
         # Header Form
@@ -299,7 +299,7 @@ class UIResource:
         updateWindow.geometry("510x200")
         
         # Load gambar input field
-        inputFieldBG = tk.PhotoImage(file="../img/inputField.png")
+        inputFieldBG = tk.PhotoImage(file="img/inputField.png")
         nameEntry = resource_name
 
         # Header Form
@@ -395,9 +395,9 @@ class UIResource:
         tabCanvas = tk.Canvas(tabControlFrame, bg="#2F0160", height=100, width=778, highlightthickness=0, bd=0)
         tabCanvas.pack(anchor="w", pady=(20, 10), fill=tk.X)
         
-        self.InventarisImage = tk.PhotoImage(file="../img/InventarisTab.png")  
-        self.LogActivityImage = tk.PhotoImage(file="../img/InventarisTab.png") 
-        self.backButtonImage = tk.PhotoImage(file="../img/xButton.png")  
+        self.InventarisImage = tk.PhotoImage(file="img/InventarisTab.png")  
+        self.LogActivityImage = tk.PhotoImage(file="img/InventarisTab.png") 
+        self.backButtonImage = tk.PhotoImage(file="img/xButton.png")  
         
         self.inventarisButton = tk.Button(
             tabCanvas, image=self.InventarisImage, text="Inventaris",  
@@ -418,7 +418,7 @@ class UIResource:
         
         tabCanvas.create_window(400, 37, window=self.logActivityButton)
         
-        self.backButtonImage = tk.PhotoImage(file="../img/xButton.png")  
+        self.backButtonImage = tk.PhotoImage(file="img/xButton.png")  
         backButton = tk.Button(
             tabCanvas, image=self.backButtonImage, command=self.goToMainPage,bg="#2F0160",
             borderwidth=0, highlightthickness=0  
@@ -459,10 +459,10 @@ class UIResource:
             widget.destroy()
 
         # Tambahkan konten inventaris
-        self.bgImage = PhotoImage(file="../img/barInventory.png")
-        self.quantityImage = PhotoImage(file="../img/quantityInventory.png")
-        self.distributeButtonImage = PhotoImage(file="../img/distributeButton.png")
-        self.deleteButton2Image = PhotoImage(file="../img/deleteButton2.png")
+        self.bgImage = PhotoImage(file="img/barInventory.png")
+        self.quantityImage = PhotoImage(file="img/quantityInventory.png")
+        self.distributeButtonImage = PhotoImage(file="img/distributeButton.png")
+        self.deleteButton2Image = PhotoImage(file="img/deleteButton2.png")
         
         inventaris = [
             {"location": "JAKARTA", "quantity": 600},
