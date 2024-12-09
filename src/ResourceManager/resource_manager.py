@@ -1,4 +1,5 @@
 import sqlite3
+from src.LogActivity.log_activity import LogActivity
 
 class ResourceManager:
     def __init__(self, db_name):
@@ -7,12 +8,12 @@ class ResourceManager:
     def connect(self):
         return sqlite3.connect(self.db_name)
 
-    def check_existing_resource(self, resource_id: int):
+    def check_existing_resource(self, resource_name: str):
         """Memeriksa apakah ada sumber daya dengan nama yang sama"""
         conn = self.connect()
         cur = conn.cursor()
         
-        cur.execute("SELECT * FROM Resources WHERE id = ?", (resource_id,))
+        cur.execute("SELECT * FROM Resources WHERE name = ?", (resource_name,))
         existing_resource = cur.fetchall()  
         
         conn.close()
@@ -54,16 +55,28 @@ class ResourceManager:
         existing_resource = cur.fetchone()
 
         current_quantity = existing_resource[2]  
+        total=existing_resource[3]
         new_quantity=0
         if (add):
             new_quantity = current_quantity + quantity
+            total+=quantity
         else:
+            if current_quantity - quantity<0:
+                return False
             new_quantity = current_quantity - quantity
+            total -= quantity
 
-        cur.execute("UPDATE Resources SET quantity = ? WHERE name = ?", (new_quantity, name))
+        cur.execute("UPDATE Resources SET quantity = ?, total = ? WHERE name = ?", (new_quantity, total, name))
+        id_resource = existing_resource[0]
         conn.commit() 
-
         conn.close()
+        log = LogActivity()
+        if add:
+            log.log_new_activity(id_resource, "increase", quantity, False)
+        else:
+            log.log_new_activity(id_resource, "decrease", quantity, False)
+    
+        return True
 
     def get_resource_quantity(self, id):
         '''Mendapatkan quantity dari resource yang dipilih user'''
@@ -86,3 +99,13 @@ class ResourceManager:
         conn.close()  
         
         return list_of_resource
+
+    def allocate():
+        '''Mengalokasikan sejumlah sumberdaya ke suatu tempat'''
+        
+
+    def deallocate():
+        '''Melakukan dealokasi terhadap sumberdaya di tempat tertentu'''
+
+    def distribute_to():
+        '''Melakukan distribusi sumber daya dari satu tempat ke tempat lain'''

@@ -281,7 +281,7 @@ class UIResource:
         
     def allocateResourceQuantity(self, nameEntry, newLocationEntry, quantityEntry, allocateWindow):
         """Mengupdate jumlah resource."""        
-        name = nameEntry.get()
+        name = nameEntry
         try:
             location = newLocationEntry.get()
             quantity = int(quantityEntry.get())

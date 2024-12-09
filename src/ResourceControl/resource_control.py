@@ -8,33 +8,30 @@ class ResourceControl:
         self.log_activity = LogActivity()
         self.report_manager = ReportManager(db_name)
 
-    def add_resource(self, resource_name: str, resource_quantity: int, resource_location: str):
-        """Menambahkan sumber daya baru."""
-        if resource_quantity <= 0:
-            raise ValueError("Quantity harus lebih besar dari nol.")
-        
-        success = self.resource_manager.create_resource(resource_name, resource_quantity)
-        if success:
-            self.log_activity.log_new_activity(resource_name, "Penambahan", "Now", resource_quantity, resource_location)
-            return f"Sumber daya '{resource_name}' berhasil ditambahkan dengan jumlah {resource_quantity}."
-        else:
-            return f"Gagal menambahkan sumber daya '{resource_name}', mungkin sudah ada."
+    def create_new_resource(self, resource_name: str, resource_quantity: int):
+        return self.resource_manager.create_resource(resource_name, resource_quantity)
 
-    def update_resource_quantity(self, resource_id: int, new_quantity: int):
+    def update_resource_quantity(self, resource_id: int, new_quantity: int, add: bool):
         """Memperbarui jumlah sumber daya."""
         if new_quantity <= 0:
-            raise ValueError("Quantity baru harus lebih besar dari nol.")
+            return False
         
-        existing_quantity = self.resource_manager.get_resource_quantity(resource_id)
-        if existing_quantity is None:
-            return f"Sumber daya '{resource_id}' tidak ditemukan."
-        
-        difference = new_quantity - existing_quantity[0]
-        add = difference > 0
-        self.resource_manager.add_or_subtract_resource_quantity(resource_id, abs(difference), add)
-        self.log_activity.log_new_activity(resource_id, "Update", "Now", abs(difference), "N/A")
-        return f"Jumlah sumber daya '{resource_id}' berhasil diperbarui ke {new_quantity}."
+        conn = self.connect()
+        cur = conn.cursor()
+
+        cur.execute("SELECT * FROM Resources WHERE id = ?", (resource_id,))
+        resource=  cur.fetchone()
+        name_resource = resource[1]
+        return self.resource_manager.add_or_subtract_resource_quantity(name_resource, new_quantity, add)
     
+    # def allocate():
+
+
+    # def deallocate():
+
+    # def distribute_to():
+
+
     def get_report_detail_id(self, id : int):
         rm = ReportManager()
         report = rm.get_report_by_id(id)

@@ -8,29 +8,34 @@ class LogActivity:
         """Membuat koneksi ke database."""
         return sqlite3.connect(self.db_name)
 
-    def log_new_activity(self, resource_id: int, action_type: str, timestamp: str, jumlah: int, lokasi: str, locate:bool):
-        """Menambahkan log aktivitas ke database."""
-        if jumlah <= 0:
-            raise ValueError("Jumlah harus lebih besar dari nol.")
-        
+    def log_new_activity(self, resource_id: int, activity: str, jumlah: int, locate: bool, lokasi: str = ""):
+        """Menambahkan log aktivitas ke database (tambah, kurangi, alokasi, distribusi, dealokasi)."""
         conn = self.connect()
         cur = conn.cursor()
-        action_detail=""
-        if locate:
-            action_detail= action_type + " " + f"{jumlah}" + " to " + lokasi
-        else:
-            action_detail= action_type + " " + "Jumlah" + " Sumber Daya"
+        action_detail = ""
 
-        try:
-            cur.execute('''
-                INSERT INTO log_activity (resource_id, activity, timestamp)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (resource_id, action_detail, timestamp))
-            conn.commit()
-        except sqlite3.Error as e:
-            raise RuntimeError(f"Kesalahan saat menambahkan log aktivitas: {str(e)}")
-        finally:
-            conn.close()
+        if activity == "allocate":
+            action_detail = f"Alokasi {jumlah} unit ke lokasi {lokasi}" if lokasi else f"Alokasi {jumlah} unit"
+        elif activity == "deallocate":
+            action_detail = f"Dealokasi {jumlah} unit dari lokasi {lokasi}" if lokasi else f"Dealokasi {jumlah} unit"
+        elif activity == "increase":
+            action_detail = f"Penambahan {jumlah} unit"
+        elif activity == "decrease":
+            action_detail = f"Pengurangan {jumlah} unit"
+        elif activity == "distribute":
+            action_detail = f"Distribusi {jumlah} unit ke lokasi {lokasi}" if lokasi else f"Distribusi {jumlah} unit"
+        else:
+            action_detail = f"Aktivitas tidak dikenali"
+
+        cur.execute("""
+            INSERT INTO LogActivity (resource_id, activity, timestamp)
+            VALUES (?, ?, CURRENT_TIMESTAMP)
+        """, (resource_id, action_detail))
+        
+        # Commit perubahan
+        conn.commit()
+        
+
 
     def get_log_activity(self, resource_id: int):
         """Mengambil log aktivitas dari database berdasarkan resource_id."""
