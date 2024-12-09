@@ -11,6 +11,7 @@ def create_tables():
         id INTEGER PRIMARY KEY AUTOINCREMENT,   
         name TEXT NOT NULL,
         quantity INTEGER NOT NULL
+        total_quantity INTEGER NOT NULL
     )
     """)
 
