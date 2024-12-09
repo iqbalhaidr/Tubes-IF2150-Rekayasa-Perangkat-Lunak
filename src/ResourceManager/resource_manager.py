@@ -1,5 +1,6 @@
 import sqlite3
-from src.LogActivity.log_activity import LogActivity
+from LogActivity.log_activity import LogActivity
+from Inventaris.inventaris import Inventaris
 
 class ResourceManager:
     def __init__(self, db_name):
@@ -100,12 +101,29 @@ class ResourceManager:
         
         return list_of_resource
 
-    def allocate():
+    def allocate(self, resource_id, quantity, location):
         '''Mengalokasikan sejumlah sumberdaya ke suatu tempat'''
+        conn = self.connect()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM Resources WHERE id = ?", (resource_id,))
+        resource=  cur.fetchone()
+        curr_quantity= resource[2]
+
+        if curr_quantity - quantity < 0 :
+            conn.close()
+            return False
         
+        cur.execute("SELECT * FROM Inventaris WHERE location = ? AND resource_id = ?", (location, resource_id))
+        location = cur.fetchall()
+        if  len(location)>0:
+            conn.close()
+            return False
+        else:
+            inven = Inventaris()
+            state = inven.allocate(resource_id, quantity, location)
+            updated = curr_quantity-quantity
+            cur.execute("UPDATE Resources SET quantity = ? WHERE id = ?", (updated, resource_id))
+            conn.close()
+            return state
 
-    def deallocate():
-        '''Melakukan dealokasi terhadap sumberdaya di tempat tertentu'''
 
-    def distribute_to():
-        '''Melakukan distribusi sumber daya dari satu tempat ke tempat lain'''

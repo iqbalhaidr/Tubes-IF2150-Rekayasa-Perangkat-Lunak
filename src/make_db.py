@@ -10,7 +10,7 @@ def create_tables():
     CREATE TABLE IF NOT EXISTS Resources (
         id INTEGER PRIMARY KEY AUTOINCREMENT,   
         name TEXT NOT NULL,
-        quantity INTEGER NOT NULL
+        quantity INTEGER NOT NULL,
         total_quantity INTEGER NOT NULL
     )
     """)
