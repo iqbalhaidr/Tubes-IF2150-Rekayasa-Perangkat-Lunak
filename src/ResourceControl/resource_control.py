@@ -1,6 +1,6 @@
-from ResourceManager import ResourceManager
-from LogActivity import LogActivity
-from ReportManager import ReportManager
+from src.ResourceManager.resource_manager import ResourceManager
+from src.LogActivity.log_activity import LogActivity
+from src.ReportManager.report_manager import ReportManager
 #please check
 class ResourceControl:
     def __init__(self, db_name="SIMADA.db"):
@@ -34,17 +34,30 @@ class ResourceControl:
         self.resource_manager.add_or_subtract_resource_quantity(resource_id, abs(difference), add)
         self.log_activity.log_new_activity(resource_id, "Update", "Now", abs(difference), "N/A")
         return f"Jumlah sumber daya '{resource_id}' berhasil diperbarui ke {new_quantity}."
+    
+    def get_report_detail_id(self, id : int):
+        rm = ReportManager()
+        report = rm.get_report_by_id(id)
+        if report is None:
+            return None
+        else:
+            detail = report.detail
 
-    def make_report(resource_id: int, reportDetails: str):
-        """Menambahkan report baru untuk resource jika belum ada report"""
-        isIDValid = self.resource_manager.check_existing_resource(resource_id)
-        isExistReport = self.report_manager.check_existing_report(resource_id)
-
-        if not isIDValid:
-            return f"Resource ID {resource_id} tidak dapat ditemukan."
+        return detail
+    
+    def create_report(self, id_resource ,id_report :int, detail: str):
+        if not detail:
+            return False #gagal
+        return self.report_manager.add_report(id_report, id_resource, detail)
+    
+    def update_report(self,id_report :int, detail: str):
+        if not detail:
+            return False #gagal
+        return self.report_manager.update_report_by_id(id_report, detail)
+    
+    def delete_report(self, id):
+        return self.report_manager.delete_report_by_id(id)
+    
+    def check_exist_report(self, id):
+        return self.report_manager.check_existing_report(id)
         
-        if isExistReport:
-            return f"Tidak dapat membuat report karena Resource ID {resource_id} sudah memiliki report, silahkan untuk mengupdate informasi jika diperlukan."
-        
-        message = self.report_manager.add_report(resource_id, reportDetails)
-        return message
