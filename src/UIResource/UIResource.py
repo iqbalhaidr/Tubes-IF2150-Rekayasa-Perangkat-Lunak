@@ -151,7 +151,7 @@ class UIResource:
         InventarisButton = tk.Button(
             self.firstPageScrollableFrame,
             image=self.InventarisButtonImage,
-            command=lambda: self.goToSecondPage(),
+            command=lambda: self.goToSecondPage(resource[0]),
             bd=0,
             highlightthickness=0,
             bg="#2F0160",
@@ -442,7 +442,7 @@ class UIResource:
         messagebox.showinfo("Informasi", f"Resource {resource_name} telah dihapus.")
 
         
-    def setupSecondPage(self):
+    def setupSecondPage(self, resource_id):
         """Menyiapkan halaman kedua dengan scrollable canvas dan tab"""
         self.secondPage = tk.Frame(self.root)
         self.secondPage.pack(fill=tk.BOTH, expand=True)  
@@ -464,9 +464,9 @@ class UIResource:
         self.canvas_second.create_window((0, 0), window=self.secondPageScrollableFrame, anchor="nw")
 
         self.secondPageScrollableFrame.bind("<Configure>", lambda e: self.canvas_second.configure(scrollregion=self.canvas_second.bbox("all")))
-        self.setupSecondPageContent()
+        self.setupSecondPageContent(resource_id)
 
-    def setupSecondPageContent(self):
+    def setupSecondPageContent(self,resource_id):
         self.currentActiveTab = 'inventaris'  
         
         tabControlFrame = tk.Frame(self.secondPageScrollableFrame, bg="#2F0160")
@@ -485,7 +485,7 @@ class UIResource:
         self.inventarisButton = tk.Button(
             tabCanvas, image=self.InventarisImage, text="Inventaris",  
             font=("Arial", 22, "bold"), bg="#2F0160", fg="white", 
-            command=lambda: self.togglesecondPageTab('inventaris'), borderwidth=0,
+            command=lambda: self.togglesecondPageTab('inventaris', resource_id), borderwidth=0,
             highlightthickness=0, relief="flat",  
             compound="center"  
         )
@@ -494,7 +494,7 @@ class UIResource:
         self.logActivityButton = tk.Button(
             tabCanvas, image=self.LogActivityImage, text="Log Activity", 
             font=("Arial", 22, "bold"), bg="#2F0160", fg="#2F0160", 
-            command=lambda: self.togglesecondPageTab('logActivity'), borderwidth=0,
+            command=lambda: self.togglesecondPageTab('logActivity', resource_id), borderwidth=0,
             highlightthickness=0, relief="flat",  
             compound="center"  
         )
@@ -510,7 +510,7 @@ class UIResource:
         
         tabCanvas.create_line(0, 65, 778, 65, fill="white", width=2)
 
-        self.showTab(self.showInventoryContent)
+        self.showTab(lambda: self.showInventoryContent(resource_id))
         self.updateTabState()
 
     def updateTabState(self):
@@ -524,19 +524,21 @@ class UIResource:
         else:   
             self.logActivityButton.config(image="", fg="white")  
 
-    def togglesecondPageTab(self, tabName):
+    def togglesecondPageTab(self, tabName, resource_id):
         if tabName == 'inventaris':
             self.currentActiveTab = 'inventaris'  
-            self.showTab(self.showInventoryContent)  
+            self.showTab(lambda: self.showInventoryContent(resource_id))  
         elif tabName == 'logActivity':
             self.currentActiveTab = 'logActivity'  
-            self.showTab(self.showLogActivityContent)  
+            self.showTab(lambda: self.showLogActivityContent(resource_id))
+
 
         self.updateTabState()
 
 
-    def showInventoryContent(self):
+    def showInventoryContent(self, resource_id):
         """Menampilkan konten tab Inventaris"""
+        self.inventaris_canvases = []
         # Bersihkan tab konten
         for widget in self.tabContentFrame.winfo_children():
             widget.destroy()
@@ -547,15 +549,30 @@ class UIResource:
         self.distributeButtonImage = PhotoImage(file="img/distributeButton.png")
         self.deleteButton2Image = PhotoImage(file="img/deleteButton2.png")
         
-        inventaris = [
-            {"location": "JAKARTA", "quantity": 600},
-            {"location": "BANDUNG", "quantity": 777},
-            {"location": "WAKANDA", "quantity": 888},
-            {"location": "IKN", "quantity": 999},
-        ]
+        self.updateInventaris(resource_id)
+            
+    def updateInventaris(self, resource_id):
+        print(f"resource_id {resource_id}")
+        for inventaris_canvas in self.inventaris_canvases:
+            inventaris_canvas.destroy()
+            
+        # kosongkan
+        self.inventaris_canvases.clear()
         
-        for inventory in inventaris:
-            self.createInventoryRow(inventory)
+        if hasattr(self, 'no_inventory_label') and self.no_inventory_label:
+            self.no_inventory_label.destroy()
+        Inventaris = self.resourceControl.get_all_inventaris(resource_id)
+        print(f"inv {Inventaris}")
+        
+        if Inventaris:
+            print(f"inventaris {Inventaris}")
+            # Jika ada inventaris, tampilkan di UI
+            for Inventory in Inventaris:
+                self.createInventoryRow(Inventory)
+        else:
+            # Jika tidak ada inventaris
+            self.no_inventory_label = tk.Label(self.tabContentFrame, text="Tidak ada inventory yang dialokasikan", font=("Arial", 18, "bold"), bg="#2F0160", fg="white")
+            self.no_inventory_label.pack(padx=(265,10), pady=10, anchor="w")
     
     def createInventoryRow(self, inventory):
         inventoryCanvas = tk.Canvas(self.tabContentFrame, width=678, height=91, bg='#2F0160', highlightthickness=0)
@@ -566,19 +583,19 @@ class UIResource:
         inventoryCanvas.image = self.bgImage 
         
         # Menambahkan elemen di atas gambar (menggunakan koordinat)
-        nameLabel = tk.Label(self.tabContentFrame, text=inventory["location"], font=("Arial", 20, "bold"), bg="#F7F7F7", fg="black")
+        nameLabel = tk.Label(self.tabContentFrame, text=inventory[2], font=("Arial", 20, "bold"), bg="#F7F7F7", fg="black")
         inventoryCanvas.create_window(30, 45, anchor="w", window=nameLabel)  # Label di kiri atas (disesuaikan dengan koordinat)
         
         inventoryCanvas.create_image(315, 22, anchor="nw", image=self.quantityImage)
         inventoryCanvas.image = self.quantityImage 
         
-        QuantityLabel = tk.Label(self.tabContentFrame, text=f'{inventory["quantity"]}', font=("Arial", 20, "bold"), bg="#2F0160", fg="white")
+        QuantityLabel = tk.Label(self.tabContentFrame, text=inventory[3], font=("Arial", 20, "bold"), bg="#2F0160", fg="white")
         inventoryCanvas.create_window(405, 45, anchor="w", window=QuantityLabel)  # Label di kiri atas (disesuaikan dengan koordinat)
         
         deleteButton2 = tk.Button(
             self.tabContentFrame,
             image=self.deleteButton2Image,
-            command=lambda: self.deleteInventory(inventory["location"]),
+            command=lambda: self.deleteInventory(inventory[2]),
             bd=0,
             highlightthickness=0,
             bg="#2F0160",
@@ -586,10 +603,12 @@ class UIResource:
         )
         inventoryCanvas.create_window(515, 45, anchor="w", window=deleteButton2)
         
+        self.inventaris_canvases.append(inventoryCanvas)
+        
         distributeButton = tk.Button(
             self.tabContentFrame,
             image=self.distributeButtonImage,
-            command=lambda: self.formDistributeInventory(inventory["location"]),
+            command=lambda: self.formDistributeInventory(inventory[2]),
             bd=0,
             highlightthickness=0,
             bg="#2F0160",
@@ -665,13 +684,12 @@ class UIResource:
         
         DistributeWindow.inputFieldBG = inputFieldBG
         
-    def distributeInventory(self, LocationEntry, ToLocationEntry, quantityEntry, allocateWindow):
+    def distributeInventory(self, inventaris_id, ToLocationEntry, quantityEntry, allocateWindow):
         """Mengupdate jumlah resource."""        
-        location = LocationEntry.get()
         try:
             Tolocation = ToLocationEntry.get()
             quantity = int(quantityEntry.get())
-            message = self.resource_control.allocate_resource(location, Tolocation, quantity)
+            message = self.resourceControl.distribute_to(inventaris_id, Tolocation, quantity)
             messagebox.showinfo("Informasi", message)
         except ValueError:
             messagebox.showerror("Error", "Jumlah harus berupa angka yang valid!")
@@ -680,8 +698,9 @@ class UIResource:
         
             
 
-    def showLogActivityContent(self):
+    def showLogActivityContent(self, resource_id):
         """Menampilkan konten tab I"""
+        self.logActivity_canvases = []
         # Bersihkan tab konten
         for widget in self.tabContentFrame.winfo_children():
             widget.destroy()
@@ -699,6 +718,29 @@ class UIResource:
         
         for activity in LogActivities:
             self.createActivityRow(activity)
+    
+    def updateLogActivity(self):
+        for logActivity_canvas in self.logActivity_canvases:
+            logActivity_canvas.destroy()
+            
+        # kosongkan
+        self.logActivity_canvases.clear()
+        
+        # if hasattr(self, 'no_resource_label') and self.no_resource_label:
+        #     self.no_resource_label.destroy()
+        
+        LogActivites = self.resourceControl.get_all_resource_information()
+        
+        if LogActivites:
+            print(LogActivites)
+            # Jika ada resource, tampilkan resource di UI
+            for LogActivity in LogActivites:
+                self.createResourceRow(LogActivity)
+        else:
+            # Jika tidak ada resource, tampilkan pesan "Tidak ada resource"
+            self.no_resource_label = tk.Label(self.firstPageScrollableFrame, text="Tidak ada resource", font=("Arial", 18, "bold"), bg="#2F0160", fg="white")
+            self.no_resource_label.pack(padx=(265,10), pady=10, anchor="w")
+        
             
     def createActivityRow(self, activity):
         activityCanvas = tk.Canvas(self.tabContentFrame, width=678, height=91, bg='#2F0160', highlightthickness=0)
@@ -713,7 +755,7 @@ class UIResource:
         inventarisButton = tk.Button(
             self.tabContentFrame,
             image=self.InventarisButton2Image,
-            command=lambda: self.delete(activity["report"]),
+            command=lambda: self.seeReport(activity["report"]),
             bd=0,
             highlightthickness=0,
             bg="#2F0160",
@@ -731,11 +773,32 @@ class UIResource:
             activebackground="#2F0160"
         )
         activityCanvas.create_window(600, 45, anchor="w", window=reportButton)
-        
-        
-        
+
+    def seeReport(self, id):
+        report = self.resourceControl.get_report_detail_id(id)
+        if report:  # Menggunakan 'report' untuk mengecek apakah ada data
+            popup = tk.Toplevel()
+            popup.geometry("300x300")
+            popup.title("Laporan")
+            popup.config(bg="#2F0160")
             
-    
+            # Frame untuk konten dan scrollbar
+            frame = tk.Frame(popup)
+            frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+            frame.pack_propagate(False)  # Menghentikan frame untuk menyesuaikan dengan konten
+
+            # Membuat widget Text untuk menampilkan laporan
+            text_box = tk.Text(frame, wrap="word", font=("Arial", 12), height=10, width=45, 
+                            bg="#2F0160", fg="white", bd=0, relief="flat")  # Menggunakan ungu dan tanpa border
+            text_box.insert(tk.END, report)  # Memasukkan laporan ke dalam Text box
+            text_box.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+            # Menambahkan scrollbar vertikal
+            scrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL, command=text_box.yview)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+            # Menyambungkan scrollbar dengan Text box
+            text_box.config(yscrollcommand=scrollbar.set)
 
     def showTab(self, content_function):
         """Membersihkan konten tab sebelumnya dan menampilkan konten baru"""
@@ -745,6 +808,7 @@ class UIResource:
 
         # Tampilkan konten tab baru
         content_function()
+        
 
 
     def check_size(self):
@@ -753,9 +817,9 @@ class UIResource:
         print(f"Geometry: {self.secondPageScrollableFrame.winfo_geometry()}")
 
 
-    def goToSecondPage(self):
+    def goToSecondPage(self, resource_id):
         self.firstPage.pack_forget()  
-        self.setupSecondPage() 
+        self.setupSecondPage(resource_id) 
         
     def goToMainPage(self):
         """Kembali ke halaman pertama"""

@@ -43,7 +43,9 @@ class ResourceControl:
     def delete_location(self, inventaris_id):
         return self.inventory.delete_location_zero_loc_qty(inventaris_id)
 
-
+    def get_all_inventaris(self, resource_id):
+        return self.inventory.get_all_allocation_by_id(resource_id)
+    
     def get_report_detail_id(self, id : int):
         rm = ReportManager()
         report = rm.get_report_by_id(id)

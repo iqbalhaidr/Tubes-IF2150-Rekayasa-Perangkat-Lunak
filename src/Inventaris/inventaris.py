@@ -16,6 +16,12 @@ class Inventaris:
             INSERT INTO Inventaris (resource_id, location, quantity)
             VALUES (?, ?, ?)
         """, (resource_id, location.upper(), quantity))
+        conn.commit()  
+        
+        cur.execute("SELECT * FROM Inventaris WHERE resource_id = ?", (resource_id,))
+        new_rec =  cur.fetchone()
+        print(f"inventaris {new_rec}")
+            
         conn.close()
         return True
         
@@ -118,11 +124,10 @@ class Inventaris:
         """Mengambil semua alokasi untuk sumber daya tertentu."""
         conn = self.connect()
         cur = conn.cursor()
-        cur.execute('''
-            SELECT inventaris_id, location, quantity FROM Inventaris
-            WHERE resource_id = ?
-        ''', (resource_id,  ))
+        cur.execute("SELECT * FROM Inventaris WHERE resource_id = ?", (resource_id,))
         all_location = cur.fetchall()
+        print(f"resource_id {resource_id}")
+        print(f"ambil inv {all_location}")
 
         conn.close()
         return all_location ## formatnya inventaris_id, loc, qty
