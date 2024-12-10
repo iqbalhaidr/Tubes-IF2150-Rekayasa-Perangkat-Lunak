@@ -1,5 +1,5 @@
 import sqlite3
-from src.Report.Report import Report
+from Report.Report import Report
 class ReportManager:
     def __init__(self, db_name="SIMADA.db"):
         self.db_name = db_name

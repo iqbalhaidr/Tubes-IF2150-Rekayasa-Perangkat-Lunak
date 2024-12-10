@@ -119,7 +119,7 @@ class Inventaris:
         conn = self.connect()
         cur = conn.cursor()
         cur.execute('''
-            SELECT inventaris_id, location, quantity FROM Inventaris
+            SELECT * FROM Inventaris
             WHERE resource_id = ?
         ''', (resource_id,  ))
         all_location = cur.fetchall()
