@@ -26,6 +26,9 @@ class ResourceControl:
         name_resource = resource[1]
         return self.resource_manager.add_or_subtract_resource_quantity(name_resource, new_quantity, add)
     
+    def delete_available_resource(self ,id:int):
+        return self.resource_manager.delete_resource(id)
+    
     def allocate(self, resource_id, quantity, location):
         '''Mengalokasikan sejumlah sumberdaya ke suatu tempat'''
         return self.resource_manager.allocate(resource_id, quantity, location)
