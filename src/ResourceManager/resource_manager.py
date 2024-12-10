@@ -132,6 +132,8 @@ class ResourceManager:
             cur.execute("SELECT * FROM Resources WHERE id = ?", (resource_id,))
             new_rec=  cur.fetchone()
             print(new_rec)
+            log = LogActivity()
+            log.log_new_activity(resource_id, "allocate", quantity, True, location.upper())
             
             conn.close()
             return state

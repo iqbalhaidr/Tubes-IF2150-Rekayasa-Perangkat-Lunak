@@ -273,28 +273,29 @@ def see_report(id):
     control = ResourceControl()
     report = control.get_report_detail_id(id)
 
-    if report:  # Menggunakan 'report' untuk mengecek apakah ada data
+    if report:  # Cek ada data/tidak
         popup = tk.Toplevel()
         popup.geometry("300x300")
         popup.title("Laporan")
         popup.config(bg="#2F0160")
         
-        # Frame untuk konten dan scrollbar
         frame = tk.Frame(popup)
         frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-        frame.pack_propagate(False)  # Menghentikan frame untuk menyesuaikan dengan konten
+        frame.pack_propagate(False)  
 
-        # Membuat widget Text untuk menampilkan laporan
+        #Membuat Popup Berada Ditengah
+        position_top, position_left = middle(300, 100)
+        popup.geometry(f"{position_left-90}+{position_top+100}") 
+
+        # Frame tampil laporan
         text_box = tk.Text(frame, wrap="word", font=("Arial", 12), height=10, width=45, 
-                           bg="#2F0160", fg="white", bd=0, relief="flat")  # Menggunakan ungu dan tanpa border
-        text_box.insert(tk.END, report)  # Memasukkan laporan ke dalam Text box
+                           bg="#2F0160", fg="white", bd=0, relief="flat")  
+        text_box.insert(tk.END, report) 
         text_box.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        # Menambahkan scrollbar vertikal
         scrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL, command=text_box.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        # Menyambungkan scrollbar dengan Text box
         text_box.config(yscrollcommand=scrollbar.set)
 
     else:
@@ -309,9 +310,9 @@ def see_report(id):
         label = tk.Label(popup, text="Maaf, belum ada Laporan untuk Log ini", wraplength=300, bg="#2F0160", fg="white", font=("Arial", 12))
         label.pack(pady=10)
 
-    # Tombol Close yang selalu berada di bawah popup
+    
     close_button = tk.Button(popup, text="Close", command=popup.destroy, bg="#2F0160", fg="white")
-    close_button.pack(side=tk.BOTTOM, pady=10)  # Menempatkan tombol di bagian bawah
+    close_button.pack(side=tk.BOTTOM, pady=10) 
 
 
 

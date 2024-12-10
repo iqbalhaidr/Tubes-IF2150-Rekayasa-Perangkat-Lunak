@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
-from tkinter import PhotoImage
+from tkinter import PhotoImage, Button, Label, Toplevel, Text, Frame
 from ResourceControl.resource_control import ResourceControl
 
 class UIResource:
@@ -464,7 +464,17 @@ class UIResource:
         self.canvas_second.create_window((0, 0), window=self.secondPageScrollableFrame, anchor="nw")
 
         self.secondPageScrollableFrame.bind("<Configure>", lambda e: self.canvas_second.configure(scrollregion=self.canvas_second.bbox("all")))
+        self.canvas_second.bind_all("<MouseWheel>", self.on_mouse_wheel)
         self.setupSecondPageContent(id)
+
+    def on_mouse_wheel(self, event):
+        """Menangani event scroll menggunakan mouse wheel atau trackpad"""
+        if event.delta: 
+            self.canvas_second.yview_scroll(int(-1*(event.delta/120)), "units")
+        elif event.num == 5:  
+            self.canvas_second.yview_scroll(1, "units")
+        elif event.num == 4: 
+            self.canvas_second.yview_scroll(-1, "units")
 
     def setupSecondPageContent(self,id):
         self.currentActiveTab = 'inventaris'  
@@ -691,14 +701,17 @@ class UIResource:
         self.InventarisButton2Image = PhotoImage(file="img/seereportbutton.png")
         self.reportButtonImage = PhotoImage(file="img/reportButton.png")
         
-        LogActivities = [
-            {"report":"Allocate 100 Vibranium to Jakarta"},
-            {"report":"Distribute 100 Vibranium to Bandung"},
-            {"report": "Deallocate 50 Vibranium from Jakarta"},
-        ]
+        LogActivities = self.resourceControl.get_all_log_for_resource(id)
+        print(f"INI ID {id}")
+        print(LogActivities)
+        # LogActivities = [
+        #     {"report":"Allocate 100 Vibranium to Jakarta"},
+        #     {"report":"Distribute 100 Vibranium to Bandung"},
+        #     {"report": "Deallocate 50 Vibranium from Jakarta"},
+        # ]
         
         for activity in LogActivities:
-            self.createActivityRow(activity, id)
+            self.createActivityRow(activity, id) #id disini resource id
             
     def createActivityRow(self, activity, id):
         activityCanvas = tk.Canvas(self.tabContentFrame, width=678, height=91, bg='#2F0160', highlightthickness=0)
@@ -707,13 +720,14 @@ class UIResource:
         activityCanvas.create_image(0, 0, anchor="nw", image=self.bgImage)
         activityCanvas.image = self.bgImage
         
-        reportLabel = tk.Label(self.tabContentFrame, text=activity["report"], font=("Arial", 18, "bold"), bg="#F7F7F7", fg="black")
+        reportLabel = tk.Label(self.tabContentFrame, text=activity[2], font=("Arial", 14, "bold"), bg="#F7F7F7", fg="black")
         activityCanvas.create_window(30, 45, anchor="w", window=reportLabel) 
         
+        #Button see report
         inventarisButton = tk.Button(
             self.tabContentFrame,
             image=self.InventarisButton2Image,
-            command=lambda: self.delete(activity["report"]),
+            command=lambda id_log = activity[0]: self.see_report(id_log),
             bd=0,
             highlightthickness=0,
             bg="#2F0160",
@@ -721,10 +735,11 @@ class UIResource:
         )
         activityCanvas.create_window(530, 45, anchor="w", window=inventarisButton)
         
+        #Button opsi CRUD
         reportButton = tk.Button(
             self.tabContentFrame,
             image=self.reportButtonImage,
-            command=lambda: self.distributeResource(activity["report"]),
+            command=lambda id_log = activity[0]: self.open_popup(id_log, id),
             bd=0,
             highlightthickness=0,
             bg="#2F0160",
@@ -732,8 +747,187 @@ class UIResource:
         )
         activityCanvas.create_window(600, 45, anchor="w", window=reportButton)
         
+    
+    def middle(self, popup_height, popup_width):
+        window = self.root
+        screen_width = window.winfo_width()
+        screen_height = window.winfo_height()
+        position_top = window.winfo_rooty() + (screen_height // 2 - popup_height // 2)
+        position_left = window.winfo_rootx() + (screen_width // 2 - popup_width // 2)
+
+        return position_top,position_left
+            
+    def open_popup(self, id, res_id):
+        window = self.root
+        popup = Toplevel(window)
+        popup.geometry("350x150")
+        popup.config(bg="#2F0160")  
+        popup.grab_set() 
+        popup_width = 350
+        popup_height = 120
+        screen_width = window.winfo_width()
+        screen_height = window.winfo_height()
+
+        #Tengah-Tengah
+        position_top = window.winfo_rooty() + (screen_height // 2 - popup_height // 2)
+        position_left = window.winfo_rootx() + (screen_width // 2 - popup_width // 2)
+        popup.geometry(f'{popup_width}x{popup_height}+{position_left}+{position_top}')
+
+        title_label = Label(popup, text="Action for Report in Log", font=("Arial", 14, "bold"), bg="#2F0160", fg="white")
+        title_label.pack(pady=10)  
+
+        def create_action():
+            popup.destroy()
+            rc = ResourceControl()
+            already_exist = rc.check_exist_report(id)
+            if already_exist:
+                messagebox.showinfo("Eror", "Laporan sudah pernah dibuat.")
+            else:
+                self.open_form(res_id, id, action="create")
+
+        def update_action():
+            popup.destroy()
+            rc = ResourceControl()
+            already_exist = rc.check_exist_report(id)
+            if not already_exist:
+                messagebox.showinfo("Eror", "Laporan belum pernah dibuat, tidak ada yang bisa diupdate.")
+            else:
+                self.open_form(res_id, id, action="update")
+
+        def delete_action():
+            rc = ResourceControl()
+            already_exist = rc.check_exist_report(id)
+            if not already_exist:
+                messagebox.showinfo("Failed", "Gagal menghapus laporan karena laporan belum pernah dibuat")
+            else:
+                berhasil = rc.delete_report(id)
+                messagebox.showinfo("Success", f"Laporan dengan ID {id} berhasil dihapus.")
+            popup.destroy()
+
+        def cancel_action():
+            print("Cancel action")
+            popup.destroy()
+
+        button_frame = Frame(popup, bg="#2F0160") 
+        button_frame.pack(side="bottom", fill="x", pady=20)
+
+        # Tombol Create, Update, Delete, dan Cancel
+        Button(button_frame, text="Create", command=create_action, bg="#28a745", fg="white").pack(side="left", fill="x", expand=True, padx=5)
+        Button(button_frame, text="Update", command=update_action, bg="#2196F3", fg="white").pack(side="left", fill="x", expand=True, padx=5)
+        Button(button_frame, text="Delete", command=delete_action, bg="red", fg="white").pack(side="left", fill="x", expand=True, padx=5)
+        Button(button_frame, text="Cancel", command=cancel_action, bg="black", fg="white").pack(side="left", fill="x", expand=True, padx=5)
         
+            
+    def open_form(self, res_id, id, action):
+        # Membuka pop-up baru untuk form input
+        window = self.root
+        form_popup = Toplevel(window)
+        popup_width = 400
+        popup_height = 300
         
+        position_top, position_left= self.middle(popup_height,popup_width)
+        form_popup.geometry(f"{popup_width}x{popup_height}+{position_left}+{position_top}")
+        form_popup.config(bg="#2F0160")
+        form_popup.grab_set()
+        form_popup.title(f"{action.capitalize()} Report for ID: {id}")
+
+        # Label dan input field untuk form
+        label_input = Label(form_popup, text=f"Enter detail to {action} Report:", bg="#2F0160", fg="white", font=("Arial", 12))
+        label_input.pack(pady=10)
+
+        # Input Paragraf
+        input_field = Text(form_popup, width=50, height=10, font=("Arial", 12), bd=3, relief="solid")
+        input_field.pack(pady=5, padx=10)  
+
+        # Fungsi Create and Update
+        def submit_create_action(id):
+            user_input = input_field.get("1.0", "end-1c")
+            if not user_input:
+                messagebox.showwarning("Input Error", "Data tidak boleh kosong.")
+                return
+            rc = ResourceControl()
+            berhasil = rc.create_report(res_id, id, user_input)
+            if berhasil:
+                messagebox.showinfo("Success", "Laporan berhasil dibuat.")
+            else:
+                messagebox.showerror("Failed", "Gagal membuat laporan.")
+            form_popup.destroy()  
+
+        def submit_update_action(id):
+            user_input = input_field.get("1.0", "end-1c") 
+            if not user_input:
+                messagebox.showwarning("Input Error", "Data tidak boleh kosong.")
+                return
+            rc = ResourceControl()
+            berhasil = rc.update_report(id, user_input)
+            if berhasil:
+                messagebox.showinfo("Success", "Laporan berhasil diperbarui.")
+            else:
+                messagebox.showerror("Failed", "Gagal memperbarui laporan.")
+            form_popup.destroy()  
+
+            # Tombol Submit 
+        if action == "create":
+            Button(form_popup, text="Submit Create", command=lambda: submit_create_action(id), bg="white", fg="#2F0160", font=("Arial", 12)).pack(pady=10)
+        elif action == "update":
+            Button(form_popup, text="Submit Update", command=lambda: submit_update_action(id), bg="white", fg="#2F0160", font=("Arial", 12)).pack(pady=10)
+
+    def see_report(self,id):
+        control = ResourceControl()
+        report = control.get_report_detail_id(id)
+
+        if report:  # Cek ada data/tidak
+            popup = tk.Toplevel()
+            popup.title("Laporan")
+            popup.config(bg="#2F0160")
+            popup.grab_set()
+            popup.focus_set()
+
+            #Membuat Popup Berada Ditengah
+            position_top, position_left = self.middle(300, 100)
+            popup.geometry(f"300x300+{position_left-90}+{position_top+100}") 
+            
+            frame = tk.Frame(popup)
+            frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+            frame.pack_propagate(False)  
+
+            # Frame tampil laporan
+            text_box = tk.Text(frame, wrap="word", font=("Arial", 12), height=10, width=45, 
+                            bg="#2F0160", fg="white", bd=0, relief="flat")  
+            text_box.insert(tk.END, report) 
+            text_box.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+            scrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL, command=text_box.yview)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+            text_box.config(yscrollcommand=scrollbar.set)
+
+            # Membuat scroll hanya untuk pop up
+            def on_mouse_wheel(event):
+                """Tangani event scroll untuk text_box"""
+                text_box.yview_scroll(int(-1 * (event.delta / 120)), "units")
+                return "break"  
+
+            
+            text_box.bind("<MouseWheel>", on_mouse_wheel)  
+            text_box.bind("<Button-4>", lambda e: text_box.yview_scroll(-1, "units"))  
+            text_box.bind("<Button-5>", lambda e: text_box.yview_scroll(1, "units"))  
+
+        else:
+            popup = tk.Toplevel()
+            popup.geometry("375x100")
+            popup.title("Laporan")
+            position_top, position_left = self.middle(300, 100)
+            popup.geometry(f"300x100+{position_left-90}+{position_top+100}") 
+            popup.grab_set()
+            popup.config(bg="#2F0160")
+            
+            label = tk.Label(popup, text="Maaf, belum ada Laporan untuk Log ini", wraplength=300, bg="#2F0160", fg="white", font=("Arial", 12))
+            label.pack(pady=10)
+
+        
+        close_button = tk.Button(popup, text="Close", command=popup.destroy, bg="#2F0160", fg="white")
+        close_button.pack(side=tk.BOTTOM, pady=10) 
             
     
 

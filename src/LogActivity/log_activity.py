@@ -8,22 +8,22 @@ class LogActivity:
         """Membuat koneksi ke database."""
         return sqlite3.connect(self.db_name)
 
-    def log_new_activity(self, resource_id: int, activity: str, jumlah: int, locate: bool, lokasi: str = ""):
+    def log_new_activity(self, resource_id: int, activity: str, jumlah: int, locate: bool, lokasi: str = "", tujuan:str = ""):
         """Menambahkan log aktivitas ke database (tambah, kurangi, alokasi, distribusi, dealokasi)."""
         conn = self.connect()
         cur = conn.cursor()
         action_detail = ""
 
         if activity == "allocate":
-            action_detail = f"Alokasi {jumlah} unit ke lokasi {lokasi}" if lokasi else f"Alokasi {jumlah} unit"
+            action_detail = f"Alokasi {jumlah} unit ke {lokasi}" if lokasi else f"Alokasi {jumlah} unit"
         elif activity == "deallocate":
-            action_detail = f"Dealokasi {jumlah} unit dari lokasi {lokasi}" if lokasi else f"Dealokasi {jumlah} unit"
+            action_detail = f"Dealokasi {jumlah} unit dari {lokasi}" if lokasi else f"Dealokasi {jumlah} unit"
         elif activity == "increase":
             action_detail = f"Penambahan {jumlah} unit"
         elif activity == "decrease":
             action_detail = f"Pengurangan {jumlah} unit"
         elif activity == "distribute":
-            action_detail = f"Distribusi {jumlah} unit ke lokasi {lokasi}" if lokasi else f"Distribusi {jumlah} unit"
+            action_detail = f"Distribusi {jumlah} unit dari {lokasi} ke {tujuan}" if lokasi else f"Distribusi {jumlah} unit"
         else:
             action_detail = f"Aktivitas tidak dikenali"
 
@@ -43,8 +43,8 @@ class LogActivity:
         cur = conn.cursor()
         try:
             cur.execute('''
-                SELECT action_type, timestamp, jumlah, lokasi
-                FROM log_activity
+                SELECT *
+                FROM LogActivity
                 WHERE resource_id = ?
             ''', (resource_id,))
             logs = cur.fetchall()

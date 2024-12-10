@@ -16,6 +16,10 @@ class Inventaris:
             INSERT INTO Inventaris (resource_id, location, quantity)
             VALUES (?, ?, ?)
         """, (resource_id, location.upper(), quantity))
+        print(location.upper())
+        print(quantity)
+        print(resource_id)
+        conn.commit()
         conn.close()
         return True
         
