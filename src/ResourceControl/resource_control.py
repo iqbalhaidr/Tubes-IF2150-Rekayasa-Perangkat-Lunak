@@ -71,4 +71,9 @@ class ResourceControl:
     
     def check_exist_report(self, id):
         return self.report_manager.check_existing_report(id)
+    
+    def get_detail_allocation_loc (self, resource_id):
+        return self.inventory.get_all_allocation_by_id(resource_id)
         
+    def get_all_log_for_resource(self, resource_id):
+        return self.log_activity.get_log_activity(resource_id)
