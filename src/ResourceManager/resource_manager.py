@@ -116,7 +116,7 @@ class ResourceManager:
             conn.close()
             return False
         
-        cur.execute("SELECT * FROM Inventaris WHERE location = ? AND resource_id = ?", (location, resource_id))
+        cur.execute("SELECT * FROM Inventaris WHERE location = ? AND resource_id = ?", (location.upper(), resource_id))
         locationArr = cur.fetchall()
         if  len(locationArr)>0:
             conn.close()

@@ -127,7 +127,7 @@ class UIResource:
         # Tambahkan tombol "Edit" dengan gambar
         editButton = tk.Button(
             self.firstPageScrollableFrame,image=self.editButtonImage,
-            command=lambda: self.formUpdateResource(resource[0], resource[1]),
+            command=lambda : self.formUpdateResource(resource[0], resource[1]),
             bd=0,  
             highlightthickness=0,  
             bg="#2F0160",  # Sesuaikan dengan warna latar belakang canvas
@@ -151,7 +151,7 @@ class UIResource:
         InventarisButton = tk.Button(
             self.firstPageScrollableFrame,
             image=self.InventarisButtonImage,
-            command=lambda: self.goToSecondPage(),
+            command=lambda id = resource[0]: self.goToSecondPage(id),
             bd=0,
             highlightthickness=0,
             bg="#2F0160",
@@ -442,7 +442,7 @@ class UIResource:
         messagebox.showinfo("Informasi", f"Resource {resource_name} telah dihapus.")
 
         
-    def setupSecondPage(self):
+    def setupSecondPage(self, id):
         """Menyiapkan halaman kedua dengan scrollable canvas dan tab"""
         self.secondPage = tk.Frame(self.root)
         self.secondPage.pack(fill=tk.BOTH, expand=True)  
@@ -464,9 +464,9 @@ class UIResource:
         self.canvas_second.create_window((0, 0), window=self.secondPageScrollableFrame, anchor="nw")
 
         self.secondPageScrollableFrame.bind("<Configure>", lambda e: self.canvas_second.configure(scrollregion=self.canvas_second.bbox("all")))
-        self.setupSecondPageContent()
+        self.setupSecondPageContent(id)
 
-    def setupSecondPageContent(self):
+    def setupSecondPageContent(self,id):
         self.currentActiveTab = 'inventaris'  
         
         tabControlFrame = tk.Frame(self.secondPageScrollableFrame, bg="#2F0160")
@@ -485,7 +485,7 @@ class UIResource:
         self.inventarisButton = tk.Button(
             tabCanvas, image=self.InventarisImage, text="Inventaris",  
             font=("Arial", 22, "bold"), bg="#2F0160", fg="white", 
-            command=lambda: self.togglesecondPageTab('inventaris'), borderwidth=0,
+            command=lambda: self.togglesecondPageTab('inventaris', id), borderwidth=0,
             highlightthickness=0, relief="flat",  
             compound="center"  
         )
@@ -494,7 +494,7 @@ class UIResource:
         self.logActivityButton = tk.Button(
             tabCanvas, image=self.LogActivityImage, text="Log Activity", 
             font=("Arial", 22, "bold"), bg="#2F0160", fg="#2F0160", 
-            command=lambda: self.togglesecondPageTab('logActivity'), borderwidth=0,
+            command=lambda: self.togglesecondPageTab('logActivity', id), borderwidth=0,
             highlightthickness=0, relief="flat",  
             compound="center"  
         )
@@ -510,7 +510,7 @@ class UIResource:
         
         tabCanvas.create_line(0, 65, 778, 65, fill="white", width=2)
 
-        self.showTab(self.showInventoryContent)
+        self.showTab(lambda: self.showInventoryContent(id))
         self.updateTabState()
 
     def updateTabState(self):
@@ -524,18 +524,18 @@ class UIResource:
         else:   
             self.logActivityButton.config(image="", fg="white")  
 
-    def togglesecondPageTab(self, tabName):
+    def togglesecondPageTab(self, tabName, id):
         if tabName == 'inventaris':
             self.currentActiveTab = 'inventaris'  
-            self.showTab(self.showInventoryContent)  
+            self.showTab(lambda: self.showInventoryContent(id))  
         elif tabName == 'logActivity':
             self.currentActiveTab = 'logActivity'  
-            self.showTab(self.showLogActivityContent)  
+            self.showTab(lambda: self.showLogActivityContent(id))
 
         self.updateTabState()
 
 
-    def showInventoryContent(self):
+    def showInventoryContent(self, id):
         """Menampilkan konten tab Inventaris"""
         # Bersihkan tab konten
         for widget in self.tabContentFrame.winfo_children():
@@ -680,7 +680,7 @@ class UIResource:
         
             
 
-    def showLogActivityContent(self):
+    def showLogActivityContent(self,id):
         """Menampilkan konten tab I"""
         # Bersihkan tab konten
         for widget in self.tabContentFrame.winfo_children():
@@ -688,7 +688,7 @@ class UIResource:
 
         # Tambahkan konten inventaris
         self.bgImage = PhotoImage(file="img/barInventory.png")
-        self.InventarisButton2Image = PhotoImage(file="img/InventarisButton2.png")
+        self.InventarisButton2Image = PhotoImage(file="img/seereportbutton.png")
         self.reportButtonImage = PhotoImage(file="img/reportButton.png")
         
         LogActivities = [
@@ -698,9 +698,9 @@ class UIResource:
         ]
         
         for activity in LogActivities:
-            self.createActivityRow(activity)
+            self.createActivityRow(activity, id)
             
-    def createActivityRow(self, activity):
+    def createActivityRow(self, activity, id):
         activityCanvas = tk.Canvas(self.tabContentFrame, width=678, height=91, bg='#2F0160', highlightthickness=0)
         activityCanvas.pack(anchor="w", padx=50, pady=(10, 10), fill="x") 
          
@@ -753,14 +753,11 @@ class UIResource:
         print(f"Geometry: {self.secondPageScrollableFrame.winfo_geometry()}")
 
 
-    def goToSecondPage(self):
+    def goToSecondPage(self, id):
         self.firstPage.pack_forget()  
-        self.setupSecondPage() 
+        self.setupSecondPage(id) 
         
     def goToMainPage(self):
         """Kembali ke halaman pertama"""
         self.secondPage.pack_forget()  
         self.firstPage.pack(fill="both", expand=True)  
-
-  
-        

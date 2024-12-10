@@ -4,22 +4,25 @@ import sys
 from pathlib import Path
 
 # Menambahkan direktori root proyek ke sys.path
-current_dir = Path(__file__).parent.parent
+current_dir = Path(__file__).parent.parent.parent
 sys.path.append(str(current_dir))
 
-from src.ResourceControl.resource_control import ResourceControl
-from src.ReportManager.report_manager import ReportManager
+# Import modul-modul yang diperlukan
+from ResourceControl.resource_control import ResourceControl
+from ReportManager.report_manager import ReportManager
 
+# Import Tkinter untuk GUI
 import tkinter as tk
 from tkinter import Toplevel, Button, Entry, Label, messagebox
 from tkinter import Tk, Canvas, PhotoImage, Frame, Text
 
 # Mendefinisikan path assets
-OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path("assets/frame0")  # Gunakan tanda "/" untuk kompatibilitas lintas platform
+OUTPUT_PATH = Path(__file__).parent.parent  # Path ke direktori tempat gui_log.py berada
+ASSETS_PATH = OUTPUT_PATH/ "build" / "assets" / "frame0"  # Folder assets/frame0 relatif terhadap OUTPUT_PATH
 
 def relative_to_assets(path: str) -> Path:
-    return ASSETS_PATH / Path(path)
+    """Fungsi untuk mendapatkan path relatif terhadap assets."""
+    return ASSETS_PATH / path
 
 window = Tk()
 window.geometry("758x539")
@@ -325,3 +328,127 @@ make_element(list_of_item)
 
 window.resizable(False, False)
 window.mainloop()
+
+
+# def middle(self, popup_height, popup_width):
+    #     window = self.root
+    #     screen_width = window.winfo_width()
+    #     screen_height = window.winfo_height()
+    #     position_top = window.winfo_rooty() + (screen_height // 2 - popup_height // 2)
+    #     position_left = window.winfo_rootx() + (screen_width // 2 - popup_width // 2)
+
+    #     return position_top,position_left
+        
+    # def open_popup(self, id, res_id):
+    #     window = self.root
+    #     popup = Toplevel(window)
+    #     popup.geometry("350x150")
+    #     popup.config(bg="#2F0160")  
+    #     popup.grab_set() 
+    #     popup_width = 350
+    #     popup_height = 120
+    #     screen_width = window.winfo_width()
+    #     screen_height = window.winfo_height()
+
+    #     #Tengah-Tengah
+    #     position_top = window.winfo_rooty() + (screen_height // 2 - popup_height // 2)
+    #     position_left = window.winfo_rootx() + (screen_width // 2 - popup_width // 2)
+    #     popup.geometry(f'{popup_width}x{popup_height}+{position_left}+{position_top}')
+
+    #     title_label = Label(popup, text="Action for Report in Log", font=("Arial", 14, "bold"), bg="#2F0160", fg="white")
+    #     title_label.pack(pady=10)  
+
+    #     def create_action():
+    #         popup.destroy()
+    #         rc = ResourceControl()
+    #         already_exist = rc.check_exist_report(id)
+    #         if already_exist:
+    #             messagebox.showinfo("Eror", "Laporan sudah pernah dibuat.")
+    #         else:
+    #             self.open_form(res_id, id, action="create")
+
+    #     def update_action():
+    #         popup.destroy()
+    #         rc = ResourceControl()
+    #         already_exist = rc.check_exist_report(id)
+    #         if not already_exist:
+    #             messagebox.showinfo("Eror", "Laporan belum pernah dibuat, tidak ada yang bisa diupdate.")
+    #         else:
+    #             self.open_form(res_id, id, action="update")
+
+    #     def delete_action():
+    #         rc = ResourceControl()
+    #         berhasil = rc.delete_report(id)
+    #         if berhasil:
+    #             messagebox.showinfo("Success", f"Laporan dengan ID {id} berhasil dihapus.")
+    #         else:
+    #             messagebox.showerror("Failed", f"Gagal menghapus laporan dengan ID {id}.")
+    #         popup.destroy()
+
+    #     def cancel_action():
+    #         print("Cancel action")
+    #         popup.destroy()
+
+    #     button_frame = Frame(popup, bg="#2F0160") 
+    #     button_frame.pack(side="bottom", fill="x", pady=20)
+
+    #     # Tombol Create, Update, Delete, dan Cancel
+    #     Button(button_frame, text="Create", command=create_action, bg="#28a745", fg="white").pack(side="left", fill="x", expand=True, padx=5)
+    #     Button(button_frame, text="Update", command=update_action, bg="#2196F3", fg="white").pack(side="left", fill="x", expand=True, padx=5)
+    #     Button(button_frame, text="Delete", command=delete_action, bg="red", fg="white").pack(side="left", fill="x", expand=True, padx=5)
+    #     Button(button_frame, text="Cancel", command=cancel_action, bg="black", fg="white").pack(side="left", fill="x", expand=True, padx=5)
+        
+            
+    # def open_form(self, res_id, id, action):
+    #     # Membuka pop-up baru untuk form input
+    #     window = self.root
+    #     form_popup = Toplevel(window)
+    #     popup_width = 400
+    #     popup_height = 300
+        
+    #     position_top, position_left= self.middle(popup_height,popup_width)
+    #     form_popup.geometry(f"{popup_width}x{popup_height}+{position_left}+{position_top}")
+    #     form_popup.config(bg="#2F0160")
+    #     form_popup.grab_set()
+    #     form_popup.title(f"{action.capitalize()} Report for ID: {id}")
+
+    #     # Label dan input field untuk form
+    #     label_input = Label(form_popup, text=f"Enter detail to {action} Report:", bg="#2F0160", fg="white", font=("Arial", 12))
+    #     label_input.pack(pady=10)
+
+    #     # Membuat input teks paragraf
+    #     input_field = Text(form_popup, width=50, height=10, font=("Arial", 12), bd=3, relief="solid")
+    #     input_field.pack(pady=5, padx=10)  
+
+    #     # Fungsi untuk menangani aksi Create
+    #     def submit_create_action(id):
+    #         user_input = input_field.get("1.0", "end-1c")
+    #         if not user_input:
+    #             messagebox.showwarning("Input Error", "Data tidak boleh kosong.")
+    #             return
+    #         rc = ResourceControl()
+    #         berhasil = rc.create_report(res_id, id, user_input)
+    #         if berhasil:
+    #             messagebox.showinfo("Success", "Laporan berhasil dibuat.")
+    #         else:
+    #             messagebox.showerror("Failed", "Gagal membuat laporan.")
+    #         form_popup.destroy()  
+
+    #     def submit_update_action(id):
+    #         user_input = input_field.get("1.0", "end-1c") 
+    #         if not user_input:
+    #             messagebox.showwarning("Input Error", "Data tidak boleh kosong.")
+    #             return
+    #         rc = ResourceControl()
+    #         berhasil = rc.update_report(id, user_input)
+    #         if berhasil:
+    #             messagebox.showinfo("Success", "Laporan berhasil diperbarui.")
+    #         else:
+    #             messagebox.showerror("Failed", "Gagal memperbarui laporan.")
+    #         form_popup.destroy()  
+
+    #         # Tombol Submit 
+    #         if action == "create":
+    #             Button(form_popup, text="Submit Create", command=lambda: submit_create_action(id), bg="white", fg="#2F0160", font=("Arial", 12)).pack(pady=10)
+    #         elif action == "update":
+    #             Button(form_popup, text="Submit Update", command=lambda: submit_update_action(id), bg="white", fg="#2F0160", font=("Arial", 12)).pack(pady=10)

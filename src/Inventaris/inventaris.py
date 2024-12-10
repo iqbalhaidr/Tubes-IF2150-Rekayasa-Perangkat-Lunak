@@ -89,7 +89,7 @@ class Inventaris:
         cur.execute('''
             SELECT quantity, inventaris_id FROM Inventaris
             WHERE resource_id = ?, location = ? 
-        ''', (resource_id, location ))
+        ''', (resource_id, location.upper() ))
         id_distributed_loc ,quantity_of_distributed_loc = cur.fetchone()
         new_qty_in_distributed_loc = quantity_of_distributed_loc + quantity
         new_loc_qty = location_quantity - quantity
