@@ -2,7 +2,8 @@ from ResourceManager.resource_manager import ResourceManager
 from LogActivity.log_activity import LogActivity
 from ReportManager.report_manager import ReportManager
 from Inventaris.inventaris import Inventaris
-#please check
+
+
 class ResourceControl:
     def __init__(self, db_name="SIMADA.db"):
         self.resource_manager = ResourceManager(db_name)

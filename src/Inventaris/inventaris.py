@@ -124,7 +124,10 @@ class Inventaris:
         """Mengambil semua alokasi untuk sumber daya tertentu."""
         conn = self.connect()
         cur = conn.cursor()
-        cur.execute("SELECT * FROM Inventaris WHERE resource_id = ?", (resource_id,))
+        cur.execute('''
+            SELECT * FROM Inventaris
+            WHERE resource_id = ?
+        ''', (resource_id,  ))
         all_location = cur.fetchall()
         print(f"resource_id {resource_id}")
         print(f"ambil inv {all_location}")
