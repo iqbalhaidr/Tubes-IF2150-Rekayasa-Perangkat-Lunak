@@ -8,7 +8,6 @@ import tkinter as tk
 
 if __name__ == "__main__":
 # Membuat tabel terlebih dahulu jika belum ada
-    create_tables()
 
     # Membuat aplikasi GUI
     root = tk.Tk()

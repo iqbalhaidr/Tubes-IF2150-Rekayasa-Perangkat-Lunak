@@ -39,7 +39,7 @@ class ResourceControl:
         '''Melakukan distribusi sumber daya dari satu tempat ke tempat lain'''
         if (quantity<0):
             return 0
-        return self.inventory.deallocate( inventaris_id, location, quantity)
+        return self.inventory.distribute_to(inventaris_id, location, quantity)
 
     def delete_location(self, inventaris_id):
         return self.inventory.delete_location_zero_loc_qty(inventaris_id)
