@@ -14,7 +14,7 @@ class Inventaris:
         cur = conn.cursor()
         cur.execute("""
             INSERT INTO Inventaris (resource_id, location, quantity)
-            VALUES (?, ?, CURRENT_TIMESTAMP)
+            VALUES (?, ?, ?)
         """, (resource_id, location.upper(), quantity))
         conn.close()
         return True

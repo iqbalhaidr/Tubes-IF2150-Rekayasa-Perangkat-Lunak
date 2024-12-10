@@ -48,12 +48,12 @@ class ResourceManager:
         conn.close()
         return True
 
-    def add_or_subtract_resource_quantity(self, name, quantity, add: bool):
+    def add_or_subtract_resource_quantity(self, id, quantity, add: bool):
         '''Menambahkan jumah quantity yang diinginkan pada resource'''
         conn = self.connect()
         cur = conn.cursor()
 
-        cur.execute("SELECT * FROM Resources WHERE name = ?", (name,))
+        cur.execute("SELECT * FROM Resources WHERE id = ?", (id,))
         existing_resource = cur.fetchone()
 
         current_quantity = existing_resource[2]  
@@ -68,7 +68,7 @@ class ResourceManager:
             new_quantity = current_quantity - quantity
             total -= quantity
 
-        cur.execute("UPDATE Resources SET quantity = ?, total = ? WHERE name = ?", (new_quantity, total, name))
+        cur.execute("UPDATE Resources SET quantity = ?, total_quantity = ? WHERE id = ?", (new_quantity, total, id))
         id_resource = existing_resource[0]
         conn.commit() 
         conn.close()
@@ -104,7 +104,7 @@ class ResourceManager:
         
         return list_of_resource
 
-    def allocate(self, resource_id, quantity, location):
+    def allocate(self, resource_id: int, quantity: int, location: str):
         '''Mengalokasikan sejumlah sumberdaya ke suatu tempat'''
         conn = self.connect()
         cur = conn.cursor()
@@ -117,15 +117,22 @@ class ResourceManager:
             return False
         
         cur.execute("SELECT * FROM Inventaris WHERE location = ? AND resource_id = ?", (location, resource_id))
-        location = cur.fetchall()
-        if  len(location)>0:
+        locationArr = cur.fetchall()
+        if  len(locationArr)>0:
             conn.close()
             return False
         else:
             inven = Inventaris()
             state = inven.allocate(resource_id, quantity, location)
             updated = curr_quantity-quantity
+            print(updated)
             cur.execute("UPDATE Resources SET quantity = ? WHERE id = ?", (updated, resource_id))
+            conn.commit()
+            
+            cur.execute("SELECT * FROM Resources WHERE id = ?", (resource_id,))
+            new_rec=  cur.fetchone()
+            print(new_rec)
+            
             conn.close()
             return state
 
