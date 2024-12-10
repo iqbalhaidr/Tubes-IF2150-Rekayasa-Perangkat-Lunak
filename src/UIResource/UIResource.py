@@ -442,7 +442,7 @@ class UIResource:
         messagebox.showinfo("Informasi", f"Resource {resource_name} telah dihapus.")
 
         
-    def setupSecondPage(self, id):
+    def setupSecondPage(self, id_resource):
         """Menyiapkan halaman kedua dengan scrollable canvas dan tab"""
         self.secondPage = tk.Frame(self.root)
         self.secondPage.pack(fill=tk.BOTH, expand=True)  
@@ -465,7 +465,7 @@ class UIResource:
 
         self.secondPageScrollableFrame.bind("<Configure>", lambda e: self.canvas_second.configure(scrollregion=self.canvas_second.bbox("all")))
         self.canvas_second.bind_all("<MouseWheel>", self.on_mouse_wheel)
-        self.setupSecondPageContent(id)
+        self.setupSecondPageContent(id_resource)
 
     def on_mouse_wheel(self, event):
         """Menangani event scroll menggunakan mouse wheel atau trackpad"""
@@ -476,7 +476,7 @@ class UIResource:
         elif event.num == 4: 
             self.canvas_second.yview_scroll(-1, "units")
 
-    def setupSecondPageContent(self,id):
+    def setupSecondPageContent(self,id_resource):
         self.currentActiveTab = 'inventaris'  
         
         tabControlFrame = tk.Frame(self.secondPageScrollableFrame, bg="#2F0160")
@@ -495,7 +495,7 @@ class UIResource:
         self.inventarisButton = tk.Button(
             tabCanvas, image=self.InventarisImage, text="Inventaris",  
             font=("Arial", 22, "bold"), bg="#2F0160", fg="white", 
-            command=lambda: self.togglesecondPageTab('inventaris', id), borderwidth=0,
+            command=lambda: self.togglesecondPageTab('inventaris', id_resource), borderwidth=0,
             highlightthickness=0, relief="flat",  
             compound="center"  
         )
@@ -504,7 +504,7 @@ class UIResource:
         self.logActivityButton = tk.Button(
             tabCanvas, image=self.LogActivityImage, text="Log Activity", 
             font=("Arial", 22, "bold"), bg="#2F0160", fg="#2F0160", 
-            command=lambda: self.togglesecondPageTab('logActivity', id), borderwidth=0,
+            command=lambda: self.togglesecondPageTab('logActivity', id_resource), borderwidth=0,
             highlightthickness=0, relief="flat",  
             compound="center"  
         )
@@ -520,7 +520,7 @@ class UIResource:
         
         tabCanvas.create_line(0, 65, 778, 65, fill="white", width=2)
 
-        self.showTab(lambda: self.showInventoryContent(id))
+        self.showTab(lambda: self.showInventoryContent(id_resource))
         self.updateTabState()
 
     def updateTabState(self):
@@ -534,18 +534,18 @@ class UIResource:
         else:   
             self.logActivityButton.config(image="", fg="white")  
 
-    def togglesecondPageTab(self, tabName, id):
+    def togglesecondPageTab(self, tabName, id_resource):
         if tabName == 'inventaris':
             self.currentActiveTab = 'inventaris'  
-            self.showTab(lambda: self.showInventoryContent(id))  
+            self.showTab(lambda: self.showInventoryContent(id_resource))  
         elif tabName == 'logActivity':
             self.currentActiveTab = 'logActivity'  
-            self.showTab(lambda: self.showLogActivityContent(id))
+            self.showTab(lambda: self.showLogActivityContent(id_resource))
 
         self.updateTabState()
 
 
-    def showInventoryContent(self, id):
+    def showInventoryContent(self, id_resource):
         """Menampilkan konten tab Inventaris"""
         self.inventaris_canvases = []
         # Bersihkan tab konten
@@ -558,7 +558,7 @@ class UIResource:
         self.distributeButtonImage = PhotoImage(file="img/distributeButton.png")
         self.deleteButton2Image = PhotoImage(file="img/deleteButton2.png")
         
-        self.updateInventaris(id)
+        self.updateInventaris(id_resource)
             
     def updateInventaris(self, resource_id):
         print(f"resource_id {resource_id}")
@@ -707,7 +707,7 @@ class UIResource:
         
             
 
-    def showLogActivityContent(self,id):
+    def showLogActivityContent(self,id_resource):
         """Menampilkan konten tab I"""
         self.logActivity_canvases = []
         # Bersihkan tab konten
@@ -719,8 +719,8 @@ class UIResource:
         self.InventarisButton2Image = PhotoImage(file="img/seereportbutton.png")
         self.reportButtonImage = PhotoImage(file="img/reportButton.png")
         
-        LogActivities = self.resourceControl.get_all_log_for_resource(id)
-        print(f"INI ID {id}")
+        LogActivities = self.resourceControl.get_all_log_for_resource(id_resource)
+        print(f"INI ID {id_resource}")
         print(LogActivities)
         # LogActivities = [
         #     {"report":"Allocate 100 Vibranium to Jakarta"},
@@ -729,9 +729,9 @@ class UIResource:
         # ]
         
         for activity in LogActivities:
-            self.createActivityRow(activity, id) #id disini resource id
+            self.createActivityRow(activity, id_resource) #id disini resource id
             
-    def createActivityRow(self, activity, id):
+    def createActivityRow(self, activity, id_resource):
         activityCanvas = tk.Canvas(self.tabContentFrame, width=678, height=91, bg='#2F0160', highlightthickness=0)
         activityCanvas.pack(anchor="w", padx=50, pady=(10, 10), fill="x") 
          
@@ -757,7 +757,7 @@ class UIResource:
         reportButton = tk.Button(
             self.tabContentFrame,
             image=self.reportButtonImage,
-            command=lambda id_log = activity[0]: self.open_popup(id_log, id),
+            command=lambda id_log = activity[0]: self.open_popup(id_log, id_resource),
             bd=0,
             highlightthickness=0,
             bg="#2F0160",
