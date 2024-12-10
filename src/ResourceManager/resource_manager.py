@@ -28,9 +28,9 @@ class ResourceManager:
 
         if not (self.check_existing_resource(name)):
             cur.execute("""
-            INSERT INTO Resources (name, quantity)
-            VALUES (?, ?)
-            """, (name, quantity))
+            INSERT INTO Resources (name, quantity, total_quantity)
+            VALUES (?, ?, ?)
+            """, (name, quantity, quantity))
             conn.commit()  # simpan ke database
             conn.close()
             return True #berhasil ditambahkan
@@ -92,6 +92,8 @@ class ResourceManager:
         return resource_quantity
     
     def get_all_resource(self):
+        conn = self.connect()
+        cur = conn.cursor()
         '''Mendapatkan seluruh informasi yang ada dalam table resource'''
         cur.execute("SELECT * FROM Resources")
         list_of_resource = cur.fetchall()
