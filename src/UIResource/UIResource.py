@@ -547,6 +547,7 @@ class UIResource:
 
     def showInventoryContent(self, id):
         """Menampilkan konten tab Inventaris"""
+        self.inventaris_canvases = []
         # Bersihkan tab konten
         for widget in self.tabContentFrame.winfo_children():
             widget.destroy()
@@ -557,15 +558,30 @@ class UIResource:
         self.distributeButtonImage = PhotoImage(file="img/distributeButton.png")
         self.deleteButton2Image = PhotoImage(file="img/deleteButton2.png")
         
-        inventaris = [
-            {"location": "JAKARTA", "quantity": 600},
-            {"location": "BANDUNG", "quantity": 777},
-            {"location": "WAKANDA", "quantity": 888},
-            {"location": "IKN", "quantity": 999},
-        ]
+        self.updateInventaris(resource_id)
+            
+    def updateInventaris(self, resource_id):
+        print(f"resource_id {resource_id}")
+        for inventaris_canvas in self.inventaris_canvases:
+            inventaris_canvas.destroy()
+            
+        # kosongkan
+        self.inventaris_canvases.clear()
         
-        for inventory in inventaris:
-            self.createInventoryRow(inventory)
+        if hasattr(self, 'no_inventory_label') and self.no_inventory_label:
+            self.no_inventory_label.destroy()
+        Inventaris = self.resourceControl.get_all_inventaris(resource_id)
+        print(f"inv {Inventaris}")
+        
+        if Inventaris:
+            print(f"inventaris {Inventaris}")
+            # Jika ada inventaris, tampilkan di UI
+            for Inventory in Inventaris:
+                self.createInventoryRow(Inventory)
+        else:
+            # Jika tidak ada inventaris
+            self.no_inventory_label = tk.Label(self.tabContentFrame, text="Tidak ada inventory yang dialokasikan", font=("Arial", 18, "bold"), bg="#2F0160", fg="white")
+            self.no_inventory_label.pack(padx=(265,10), pady=10, anchor="w")
     
     def createInventoryRow(self, inventory):
         inventoryCanvas = tk.Canvas(self.tabContentFrame, width=678, height=91, bg='#2F0160', highlightthickness=0)
@@ -576,19 +592,19 @@ class UIResource:
         inventoryCanvas.image = self.bgImage 
         
         # Menambahkan elemen di atas gambar (menggunakan koordinat)
-        nameLabel = tk.Label(self.tabContentFrame, text=inventory["location"], font=("Arial", 20, "bold"), bg="#F7F7F7", fg="black")
+        nameLabel = tk.Label(self.tabContentFrame, text=inventory[2], font=("Arial", 20, "bold"), bg="#F7F7F7", fg="black")
         inventoryCanvas.create_window(30, 45, anchor="w", window=nameLabel)  # Label di kiri atas (disesuaikan dengan koordinat)
         
         inventoryCanvas.create_image(315, 22, anchor="nw", image=self.quantityImage)
         inventoryCanvas.image = self.quantityImage 
         
-        QuantityLabel = tk.Label(self.tabContentFrame, text=f'{inventory["quantity"]}', font=("Arial", 20, "bold"), bg="#2F0160", fg="white")
+        QuantityLabel = tk.Label(self.tabContentFrame, text=inventory[3], font=("Arial", 20, "bold"), bg="#2F0160", fg="white")
         inventoryCanvas.create_window(405, 45, anchor="w", window=QuantityLabel)  # Label di kiri atas (disesuaikan dengan koordinat)
         
         deleteButton2 = tk.Button(
             self.tabContentFrame,
             image=self.deleteButton2Image,
-            command=lambda: self.deleteInventory(inventory["location"]),
+            command=lambda: self.deleteInventory(inventory[2]),
             bd=0,
             highlightthickness=0,
             bg="#2F0160",
@@ -596,10 +612,12 @@ class UIResource:
         )
         inventoryCanvas.create_window(515, 45, anchor="w", window=deleteButton2)
         
+        self.inventaris_canvases.append(inventoryCanvas)
+        
         distributeButton = tk.Button(
             self.tabContentFrame,
             image=self.distributeButtonImage,
-            command=lambda: self.formDistributeInventory(inventory["location"]),
+            command=lambda: self.formDistributeInventory(inventory[2]),
             bd=0,
             highlightthickness=0,
             bg="#2F0160",
@@ -675,13 +693,12 @@ class UIResource:
         
         DistributeWindow.inputFieldBG = inputFieldBG
         
-    def distributeInventory(self, LocationEntry, ToLocationEntry, quantityEntry, allocateWindow):
+    def distributeInventory(self, inventaris_id, ToLocationEntry, quantityEntry, allocateWindow):
         """Mengupdate jumlah resource."""        
-        location = LocationEntry.get()
         try:
             Tolocation = ToLocationEntry.get()
             quantity = int(quantityEntry.get())
-            message = self.resource_control.allocate_resource(location, Tolocation, quantity)
+            message = self.resourceControl.distribute_to(inventaris_id, Tolocation, quantity)
             messagebox.showinfo("Informasi", message)
         except ValueError:
             messagebox.showerror("Error", "Jumlah harus berupa angka yang valid!")
@@ -692,6 +709,7 @@ class UIResource:
 
     def showLogActivityContent(self,id):
         """Menampilkan konten tab I"""
+        self.logActivity_canvases = []
         # Bersihkan tab konten
         for widget in self.tabContentFrame.winfo_children():
             widget.destroy()
@@ -939,6 +957,7 @@ class UIResource:
 
         # Tampilkan konten tab baru
         content_function()
+        
 
 
     def check_size(self):

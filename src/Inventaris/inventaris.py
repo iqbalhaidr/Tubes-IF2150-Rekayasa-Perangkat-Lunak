@@ -25,20 +25,22 @@ class Inventaris:
         
 
     def deallocate(self, inventaris_id:int, quantity:int):
+        print(f"quantity; {quantity}")
         """Menghapus alokasi sumber daya dari lokasi tertentu."""        
         conn = self.connect()
         cur = conn.cursor()
         cur.execute('''
             SELECT resource_id, quantity FROM Inventaris
-            WHERE inventaris_id 
+            WHERE inventaris_id = ?
         ''', (inventaris_id, ))
         resource_id, location_quantity = cur.fetchone()
 
         cur.execute('''
             SELECT quantity FROM Resources
-            WHERE resource_id = ? 
+            WHERE id = ? 
         ''', (resource_id,))
         resource_qty = cur.fetchone()
+        print(resource_qty[0])
 
         #state 0 gagal
         #state 1 Berhasil dan tidak nol
@@ -48,20 +50,23 @@ class Inventaris:
         # Kurangi jumlah di lokasi
         new_quantity_loc = location_quantity - quantity
         if new_quantity_loc>=0:
-            new_quantity_resource = resource_qty + quantity
+            new_quantity_resource = resource_qty[0] + quantity
             cur.execute('''
                 UPDATE inventaris
                 SET quantity = ?
                 WHERE inventaris_id = ?
             ''', (new_quantity_loc, inventaris_id))
+            conn.commit()  
 
             cur.execute('''
                 UPDATE Resources
                 SET quantity = ?
                 WHERE id = ?
             ''', (new_quantity_resource, resource_id))
+            conn.commit()  
             conn.close()
             state = 1 if new_quantity_loc > 0 else 2
+            print("gett")
             return state
         else:
             conn.close()
@@ -73,8 +78,9 @@ class Inventaris:
         cur = conn.cursor()
         cur.execute('''
             DELETE FROM Inventaris
-            WHERE inventaris_id = %s
+            WHERE inventaris_id = ?
         ''', (inventaris_id,))
+        conn.commit()
         conn.close()
         return True
 
@@ -104,15 +110,18 @@ class Inventaris:
                 WHERE inventaris_id = ?
             ''', (new_loc_qty, inventaris_id))
 
-            cur.execute('''
-                UPDATE inventaris
-                SET quantity = ?
-                WHERE inventaris_id = ?
-            ''', (new_qty_in_distributed_loc, id_distributed_loc))
-            conn.close()
-            state = 1 if new_loc_qty > 0 else 2
-            return state
-        else:
+                cur.execute('''
+                    UPDATE inventaris
+                    SET quantity = ?
+                    WHERE inventaris_id = ?
+                ''', (new_qty_in_distributed_loc, id_distributed_loc))
+                conn.commit()
+                conn.close()
+                state = 1 if new_loc_qty > 0 else 2
+                return state
+            else:
+                return 0
+        except (ValueError, TypeError):
             return 0
 
 
@@ -127,6 +136,8 @@ class Inventaris:
             WHERE resource_id = ?
         ''', (resource_id,  ))
         all_location = cur.fetchall()
+        print(f"resource_id {resource_id}")
+        print(f"ambil inv {all_location}")
 
         conn.close()
         return all_location ## formatnya inventaris_id, loc, qty

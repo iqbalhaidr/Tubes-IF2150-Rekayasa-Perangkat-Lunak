@@ -123,7 +123,7 @@ class ResourceManager:
             return False
         else:
             inven = Inventaris()
-            state = inven.allocate(resource_id, quantity, location)
+            state = inven.allocate(resource_id, quantity, location.upper())
             updated = curr_quantity-quantity
             print(updated)
             cur.execute("UPDATE Resources SET quantity = ? WHERE id = ?", (updated, resource_id))
