@@ -143,8 +143,6 @@ class Inventaris:
             WHERE resource_id = ?
         ''', (resource_id,  ))
         all_location = cur.fetchall()
-        print(f"resource_id {resource_id}")
-        print(f"ambil inv {all_location}")
 
         conn.close()
         return all_location ## formatnya inventaris_id, loc, qty
