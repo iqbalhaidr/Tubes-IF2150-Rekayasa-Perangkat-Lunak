@@ -38,14 +38,15 @@ class ResourceManager:
             conn.close()
             return False  # Jika nama sudah ada (duplicate entry)
         
-    def delete_resource(self, name:str):
+    def delete_resource(self, id:int):
         '''Menghapus resource yang diinginkan'''
         conn = self.connect()
         cur = conn.cursor()
-        cur.execute("DELETE FROM Resources WHERE name = ?", (name,))
+        cur.execute("DELETE FROM Resources WHERE id = ?", (id,))
         conn.commit()
 
         conn.close()
+        return True
 
     def add_or_subtract_resource_quantity(self, name, quantity, add: bool):
         '''Menambahkan jumah quantity yang diinginkan pada resource'''

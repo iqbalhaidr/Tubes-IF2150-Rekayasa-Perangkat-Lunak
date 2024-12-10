@@ -2,7 +2,8 @@ from ResourceManager.resource_manager import ResourceManager
 from LogActivity.log_activity import LogActivity
 from ReportManager.report_manager import ReportManager
 from Inventaris.inventaris import Inventaris
-#please check
+
+
 class ResourceControl:
     def __init__(self, db_name="SIMADA.db"):
         self.resource_manager = ResourceManager(db_name)
@@ -77,4 +78,7 @@ class ResourceControl:
     
     def check_exist_report(self, id):
         return self.report_manager.check_existing_report(id)
+    
+    def get_detail_allocation_loc (self, resource_id):
+        return self.inventory.get_all_allocation_by_id(resource_id)
         
