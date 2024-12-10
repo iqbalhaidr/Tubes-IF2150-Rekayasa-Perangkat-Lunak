@@ -707,29 +707,38 @@ class UIResource:
         
             
 
-    def showLogActivityContent(self,id_resource):
+    def showLogActivityContent(self, id_resource):
         """Menampilkan konten tab I"""
         self.logActivity_canvases = []
-        # Bersihkan tab konten
+        
+        # Bersihkan tab 
         for widget in self.tabContentFrame.winfo_children():
             widget.destroy()
 
-        # Tambahkan konten inventaris
         self.bgImage = PhotoImage(file="img/barInventory.png")
         self.InventarisButton2Image = PhotoImage(file="img/seereportbutton.png")
         self.reportButtonImage = PhotoImage(file="img/reportButton.png")
         
+        # Ambil aktivitas log
         LogActivities = self.resourceControl.get_all_log_for_resource(id_resource)
         print(f"INI ID {id_resource}")
         print(LogActivities)
-        # LogActivities = [
-        #     {"report":"Allocate 100 Vibranium to Jakarta"},
-        #     {"report":"Distribute 100 Vibranium to Bandung"},
-        #     {"report": "Deallocate 50 Vibranium from Jakarta"},
-        # ]
         
-        for activity in LogActivities:
-            self.createActivityRow(activity, id_resource) #id disini resource id
+
+        if len(LogActivities)==0:
+            empty_message = tk.Label(
+                self.tabContentFrame,
+                text="Belum ada Aktivitas terbaru",
+                font=("Arial", 14, "bold"),
+                bg="#2F0160",
+                fg="white"
+            )
+            empty_message.pack(pady=20)
+            return 
+
+        for activity in LogActivities[::-1]: 
+            self.createActivityRow(activity, id_resource)
+
             
     def createActivityRow(self, activity, id_resource):
         activityCanvas = tk.Canvas(self.tabContentFrame, width=678, height=91, bg='#2F0160', highlightthickness=0)
