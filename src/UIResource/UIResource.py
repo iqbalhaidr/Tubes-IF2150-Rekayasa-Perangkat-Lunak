@@ -558,7 +558,7 @@ class UIResource:
         self.distributeButtonImage = PhotoImage(file="img/distributeButton.png")
         self.deleteButton2Image = PhotoImage(file="img/deleteButton2.png")
         
-        self.updateInventaris(resource_id)
+        self.updateInventaris(id)
             
     def updateInventaris(self, resource_id):
         print(f"resource_id {resource_id}")

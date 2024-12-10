@@ -110,19 +110,16 @@ class Inventaris:
                 WHERE inventaris_id = ?
             ''', (new_loc_qty, inventaris_id))
 
-                cur.execute('''
-                    UPDATE inventaris
-                    SET quantity = ?
-                    WHERE inventaris_id = ?
-                ''', (new_qty_in_distributed_loc, id_distributed_loc))
-                conn.commit()
-                conn.close()
-                state = 1 if new_loc_qty > 0 else 2
-                return state
-            else:
-                return 0
-        except (ValueError, TypeError):
-            return 0
+            cur.execute('''
+                UPDATE inventaris
+                SET quantity = ?
+                WHERE inventaris_id = ?
+            ''', (new_qty_in_distributed_loc, id_distributed_loc))
+            conn.commit()
+            conn.close()
+            state = 1 if new_loc_qty > 0 else 2
+            return state
+          
 
 
 
