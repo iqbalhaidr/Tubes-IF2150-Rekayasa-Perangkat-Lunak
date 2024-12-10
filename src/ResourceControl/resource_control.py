@@ -12,6 +12,9 @@ class ResourceControl:
 
     def create_new_resource(self, resource_name: str, resource_quantity: int):
         return self.resource_manager.create_resource(resource_name, resource_quantity)
+    
+    def get_all_resource_information(self):
+        return self.resource_manager.get_all_resource()
 
     def update_resource_quantity(self, resource_id: int, new_quantity: int, add: bool):
         """Memperbarui jumlah sumber daya."""
