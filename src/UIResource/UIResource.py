@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
-from tkinter import PhotoImage
+from tkinter import PhotoImage, Button, Label, Toplevel, Text, Frame
 from ResourceControl.resource_control import ResourceControl
 
 class UIResource:
@@ -121,7 +121,7 @@ class UIResource:
         
         editButton = tk.Button(
             self.firstPageScrollableFrame,image=self.editButtonImage,
-            command=lambda: self.formUpdateResource(resource[0], resource[1]),
+            command=lambda : self.formUpdateResource(resource[0], resource[1]),
             bd=0,  
             highlightthickness=0,  
             bg="#2F0160",  
@@ -132,7 +132,7 @@ class UIResource:
         deleteButton1 = tk.Button(
             self.firstPageScrollableFrame,
             image=self.deleteButton1Image,
-            command=lambda: self.deleteResource(resource[1]),
+            command=lambda: self.deleteResource(resource[0], resource[1]),
             bd=0,
             highlightthickness=0,
             bg="#2F0160",
@@ -420,14 +420,19 @@ class UIResource:
         updateWindow.destroy()
 
     # Mekanisme delete Resource
-    def deleteResource(self, resource_name):   
+    def deleteResource(self, resource_id, resource_name ):   
         print(f"Delete resource {resource_name}")
-        self.resourceControl.delete_available_resource(resource_name)
+        isSuccess = self.resourceControl.delete_available_resource(resource_id)
+        
         self.updateResourceList()
-        messagebox.showinfo("Informasi", f"Resource {resource_name} telah dihapus.")
+        if (isSuccess):
+            messagebox.showinfo("Informasi", f"Resource {resource_name} telah dihapus.")
+        else:
+            messagebox.showinfo("Error", f"Resource {resource_name} gagal dihapus.")
 
         
     def setupSecondPage(self, resource):
+        """Menyiapkan halaman kedua dengan scrollable canvas dan tab"""
         self.secondPage = tk.Frame(self.root)
         self.secondPage.pack(fill=tk.BOTH, expand=True)  
 
@@ -447,9 +452,19 @@ class UIResource:
         self.canvas_second.create_window((0, 0), window=self.secondPageScrollableFrame, anchor="nw")
 
         self.secondPageScrollableFrame.bind("<Configure>", lambda e: self.canvas_second.configure(scrollregion=self.canvas_second.bbox("all")))
+        self.canvas_second.bind_all("<MouseWheel>", self.on_mouse_wheel)
         self.setupSecondPageContent(resource)
 
-    def setupSecondPageContent(self,resource):
+    def on_mouse_wheel(self, event):
+        """Menangani event scroll menggunakan mouse wheel atau trackpad"""
+        if event.delta: 
+            self.canvas_second.yview_scroll(int(-1*(event.delta/120)), "units")
+        elif event.num == 5:  
+            self.canvas_second.yview_scroll(1, "units")
+        elif event.num == 4: 
+            self.canvas_second.yview_scroll(-1, "units")
+
+    def setupSecondPageContent(self, resource):
         self.currentActiveTab = 'inventaris'  
         
         tabControlFrame = tk.Frame(self.secondPageScrollableFrame, bg="#2F0160")
@@ -513,13 +528,13 @@ class UIResource:
             self.showTab(lambda: self.showInventoryContent(resource))  
         elif tabName == 'logActivity':
             self.currentActiveTab = 'logActivity'  
-            self.showTab(lambda: self.showLogActivityContent(resource))
-
+            self.showTab(lambda: self.showLogActivityContent(resource[0]))
 
         self.updateTabState()
 
-    # Tampilan untuk tab Inventory
+
     def showInventoryContent(self, resource):
+        """Menampilkan konten tab Inventaris"""
         self.inventaris_canvases = []
         
         for widget in self.tabContentFrame.winfo_children():
@@ -533,13 +548,19 @@ class UIResource:
         self.currentQuantity = tk.Label(self.tabContentFrame, text=f"{resource[2]} / {resource[3]}", font=("Arial", 18, "bold"), bg="#2F0160", fg="white")
         self.currentQuantity.pack(padx=(65,10), pady=10, anchor="w")
         
-        self.updateInventaris(resource)
+        self.updateInventaris(resource[0])
             
-    def updateInventaris(self, resource):
+    def updateInventaris(self, id_resource):
+        print(id_resource)
         self.updateResourceList()
-        
         # Update Resource
-        updatedResource = self.resources[resource[0] - 1]
+        print(f"hasil {self.resources[0]}")
+        updatedResource = None
+        for resource in self.resources:
+            if resource[0] == id_resource:
+                updatedResource = resource
+                break  # 
+            
         for inventaris_canvas in self.inventaris_canvases:
             inventaris_canvas.destroy()
             
@@ -550,12 +571,13 @@ class UIResource:
         if hasattr(self, 'no_inventory_label') and self.no_inventory_label:
             self.no_inventory_label.destroy()
             
-        Inventaris = self.resourceControl.get_all_inventaris(resource[0])
+        Inventaris = self.resourceControl.get_all_inventaris(id_resource)
         
         if Inventaris:
             print(f"inventaris {Inventaris}")
             for Inventory in Inventaris:
-                self.createInventoryRow(resource, Inventory)
+                self.createInventoryRow(Inventory)
+            print(f"hayo {updatedResource}")
             self.currentQuantity.config(text=f"{updatedResource[2]} / {updatedResource[3]}") 
         else:
             # Jika tidak ada inventaris
@@ -563,7 +585,7 @@ class UIResource:
             self.no_inventory_label.pack(padx=(135,10), pady=10, anchor="w")
     
     # Bagian menampilkan data Inventory
-    def createInventoryRow(self, resource, inventory):
+    def createInventoryRow(self, inventory):
         inventoryCanvas = tk.Canvas(self.tabContentFrame, width=678, height=91, bg='#2F0160', highlightthickness=0)
         inventoryCanvas.pack(anchor="w", padx=50, pady=(10, 10), fill="x")  #
 
@@ -582,7 +604,7 @@ class UIResource:
         deallocateButton = tk.Button(
             self.tabContentFrame,
             image=self.deallocateButtonImage,
-            command=lambda: self.formDeallocateInventory(inventory[0], resource, inventory[3]),
+            command=lambda: self.formDeallocateInventory(inventory[0], inventory[1], inventory[3]),
             bd=0,
             highlightthickness=0,
             bg="#2F0160",
@@ -595,7 +617,7 @@ class UIResource:
         distributeButton = tk.Button(
             self.tabContentFrame,
             image=self.distributeButtonImage,
-            command=lambda: self.formDistributeInventory(inventory[0], resource, inventory[2], inventory[3]),
+            command=lambda: self.formDistributeInventory(inventory[0], inventory[1], inventory[2], inventory[3]),
             bd=0,
             highlightthickness=0,
             bg="#2F0160",
@@ -604,7 +626,7 @@ class UIResource:
         inventoryCanvas.create_window(605, 45, anchor="w", window=distributeButton)    
         
     # PopUp deallocate
-    def formDeallocateInventory(self, Inventaris_id, resource, quantity):
+    def formDeallocateInventory(self, Inventaris_id, resource_id, quantity):
               
         deallocateWindow = tk.Toplevel(self.root)
         deallocateWindow.title("Deallocate Resource SIMADA")
@@ -673,7 +695,7 @@ class UIResource:
             activeforeground="yellow",
             relief="flat",
             font=("Arial", 12),
-            command=lambda: self.deallocateResource(Inventaris_id, resource, deallocQuantityEntry, delete_var.get(), deallocateWindow)
+            command=lambda: self.deallocateResource(Inventaris_id, resource_id, deallocQuantityEntry, delete_var.get(), deallocateWindow)
         )
         submitButton.pack(side="right", padx=(0, 105))
 
@@ -694,7 +716,7 @@ class UIResource:
         deallocateWindow.inputFieldBG = inputFieldBG
 
         
-    def deallocateResource(self, inventaris_id, resource, deallocQuantityEntry, isDelete, deallocateWindow):
+    def deallocateResource(self, inventaris_id, resource_id, deallocQuantityEntry, isDelete, deallocateWindow):
         try:
             quantity = int(deallocQuantityEntry.get())
             if (isDelete):
@@ -706,7 +728,7 @@ class UIResource:
                     messagebox.showinfo("Informasi", f"Resource pada lokasi berhasil dihapus.")
                 else:
                     messagebox.showinfo("Informasi", f"Resource pada lokasi didealokasi untuk sejumlah {quantity}.")
-                self.updateInventaris(resource)
+                self.updateInventaris(resource_id)
                 
             else:
                 messagebox.showwarning("Peringatan", f"Quantity yang dialokasikan melebihi total quantity")
@@ -716,7 +738,7 @@ class UIResource:
         deallocateWindow.destroy()
         
     # PopUp form Distribute Resource
-    def formDistributeInventory(self, inventaris_id, resource, location,quantity):    
+    def formDistributeInventory(self, inventaris_id, resource_id, location,quantity):    
         distributeWindow = tk.Toplevel(self.root)
         distributeWindow.title("Distribute Resource To")
         distributeWindow.config(bg='#2F0160')
@@ -794,7 +816,7 @@ class UIResource:
             activeforeground="yellow",
             relief="flat",
             font=("Arial", 12),
-            command=lambda: self.distributeInventory(inventaris_id, resource, location, ToLocationEntry, quantityEntry, delete_var.get(), distributeWindow)
+            command=lambda: self.distributeInventory(inventaris_id, resource_id, location, ToLocationEntry, quantityEntry, delete_var.get(), distributeWindow)
         )
         submitButton.pack(side="right", padx=(0, 105))
 
@@ -814,7 +836,7 @@ class UIResource:
         
         distributeWindow.inputFieldBG = inputFieldBG
         
-    def distributeInventory(self, inventaris_id, resource, location, ToLocationEntry, quantityEntry, isDelete, distributeWindow):
+    def distributeInventory(self, inventaris_id, resource_id, location, ToLocationEntry, quantityEntry, isDelete, distributeWindow):
         """Mengupdate jumlah resource."""        
         try:
             Tolocation = ToLocationEntry.get()
@@ -828,7 +850,7 @@ class UIResource:
                     messagebox.showinfo("Informasi", f"semua quantity resource di {location} berhasil dipindahkan ke {Tolocation} dan lokasi dihapus")
                 else:
                     messagebox.showinfo("Informasi", f"quantity resource sejumlah {quantity} dari {location} berhasil dipindahkan ke {Tolocation}")
-                self.updateInventaris(resource)
+                self.updateInventaris(resource_id)
             else:
                 messagebox.showwarning("Peringatan", f"lokasi atau quantity tidak valid")
         except ValueError:
@@ -838,64 +860,54 @@ class UIResource:
         
             
 
-    def showLogActivityContent(self, resource_id):
+    def showLogActivityContent(self, id_resource):
         """Menampilkan konten tab I"""
         self.logActivity_canvases = []
-        # Bersihkan tab konten
+        
+        # Bersihkan tab 
         for widget in self.tabContentFrame.winfo_children():
             widget.destroy()
 
-        # Tambahkan konten inventaris
         self.bgImage = PhotoImage(file="img/barInventory.png")
-        self.InventarisButton2Image = PhotoImage(file="img/InventarisButton2.png")
+        self.InventarisButton2Image = PhotoImage(file="img/seereportbutton.png")
         self.reportButtonImage = PhotoImage(file="img/reportButton.png")
         
-        LogActivities = [
-            {"report":"Allocate 100 Vibranium to Jakarta"},
-            {"report":"Distribute 100 Vibranium to Bandung"},
-            {"report": "Deallocate 50 Vibranium from Jakarta"},
-        ]
+        # Ambil aktivitas log
+        LogActivities = self.resourceControl.get_all_log_for_resource(id_resource)
+        print(f"INI ID {id_resource}")
+        print(LogActivities)
         
-        for activity in LogActivities:
-            self.createActivityRow(activity)
-    
-    def updateLogActivity(self):
-        for logActivity_canvas in self.logActivity_canvases:
-            logActivity_canvas.destroy()
+
+        if len(LogActivities)==0:
+            empty_message = tk.Label(
+                self.tabContentFrame,
+                text="Belum ada Aktivitas terbaru",
+                font=("Arial", 14, "bold"),
+                bg="#2F0160",
+                fg="white"
+            )
+            empty_message.pack(pady=20)
+            return 
+
+        for activity in LogActivities[::-1]: 
+            self.createActivityRow(activity, id_resource)
+
             
-        # kosongkan
-        self.logActivity_canvases.clear()
-        
-        # if hasattr(self, 'no_resource_label') and self.no_resource_label:
-        #     self.no_resource_label.destroy()
-        
-        LogActivites = self.resourceControl.get_all_resource_information()
-        
-        if LogActivites:
-            print(LogActivites)
-            # Jika ada resource, tampilkan resource di UI
-            for LogActivity in LogActivites:
-                self.createResourceRow(LogActivity)
-        else:
-            # Jika tidak ada resource, tampilkan pesan "Tidak ada resource"
-            self.no_resource_label = tk.Label(self.firstPageScrollableFrame, text="Tidak ada resource", font=("Arial", 18, "bold"), bg="#2F0160", fg="white")
-            self.no_resource_label.pack(padx=(265,10), pady=10, anchor="w")
-        
-            
-    def createActivityRow(self, activity):
+    def createActivityRow(self, activity, id_resource):
         activityCanvas = tk.Canvas(self.tabContentFrame, width=678, height=91, bg='#2F0160', highlightthickness=0)
         activityCanvas.pack(anchor="w", padx=50, pady=(10, 10), fill="x") 
          
         activityCanvas.create_image(0, 0, anchor="nw", image=self.bgImage)
         activityCanvas.image = self.bgImage
         
-        reportLabel = tk.Label(self.tabContentFrame, text=activity["report"], font=("Arial", 18, "bold"), bg="#F7F7F7", fg="black")
+        reportLabel = tk.Label(self.tabContentFrame, text=activity[2], font=("Arial", 14, "bold"), bg="#F7F7F7", fg="black")
         activityCanvas.create_window(30, 45, anchor="w", window=reportLabel) 
         
+        #Button see report
         inventarisButton = tk.Button(
             self.tabContentFrame,
             image=self.InventarisButton2Image,
-            command=lambda: self.seeReport(activity["report"]),
+            command=lambda id_log = activity[0]: self.see_report(id_log),
             bd=0,
             highlightthickness=0,
             bg="#2F0160",
@@ -903,42 +915,201 @@ class UIResource:
         )
         activityCanvas.create_window(530, 45, anchor="w", window=inventarisButton)
         
+        #Button opsi CRUD
         reportButton = tk.Button(
             self.tabContentFrame,
             image=self.reportButtonImage,
-            command=lambda: self.distributeResource(activity["report"]),
+            command=lambda id_log = activity[0]: self.open_popup(id_log, id_resource),
             bd=0,
             highlightthickness=0,
             bg="#2F0160",
             activebackground="#2F0160"
         )
         activityCanvas.create_window(600, 45, anchor="w", window=reportButton)
+        
+    
+    def middle(self, popup_height, popup_width):
+        window = self.root
+        screen_width = window.winfo_width()
+        screen_height = window.winfo_height()
+        position_top = window.winfo_rooty() + (screen_height // 2 - popup_height // 2)
+        position_left = window.winfo_rootx() + (screen_width // 2 - popup_width // 2)
 
-    def seeReport(self, id):
-        report = self.resourceControl.get_report_detail_id(id)
-        if report:  # Menggunakan 'report' untuk mengecek apakah ada data
+        return position_top,position_left
+            
+    def open_popup(self, id, res_id):
+        window = self.root
+        popup = Toplevel(window)
+        popup.geometry("350x150")
+        popup.config(bg="#2F0160")  
+        popup.grab_set() 
+        popup_width = 350
+        popup_height = 120
+        screen_width = window.winfo_width()
+        screen_height = window.winfo_height()
+
+        #Tengah-Tengah
+        position_top = window.winfo_rooty() + (screen_height // 2 - popup_height // 2)
+        position_left = window.winfo_rootx() + (screen_width // 2 - popup_width // 2)
+        popup.geometry(f'{popup_width}x{popup_height}+{position_left}+{position_top}')
+
+        title_label = Label(popup, text="Action for Report in Log", font=("Arial", 14, "bold"), bg="#2F0160", fg="white")
+        title_label.pack(pady=10)  
+
+        def create_action():
+            popup.destroy()
+            rc = ResourceControl()
+            already_exist = rc.check_exist_report(id)
+            if already_exist:
+                messagebox.showinfo("Eror", "Laporan sudah pernah dibuat.")
+            else:
+                self.open_form(res_id, id, action="create")
+
+        def update_action():
+            popup.destroy()
+            rc = ResourceControl()
+            already_exist = rc.check_exist_report(id)
+            if not already_exist:
+                messagebox.showinfo("Eror", "Laporan belum pernah dibuat, tidak ada yang bisa diupdate.")
+            else:
+                self.open_form(res_id, id, action="update")
+
+        def delete_action():
+            rc = ResourceControl()
+            already_exist = rc.check_exist_report(id)
+            if not already_exist:
+                messagebox.showinfo("Failed", "Gagal menghapus laporan karena laporan belum pernah dibuat")
+            else:
+                berhasil = rc.delete_report(id)
+                messagebox.showinfo("Success", f"Laporan dengan ID {id} berhasil dihapus.")
+            popup.destroy()
+
+        def cancel_action():
+            print("Cancel action")
+            popup.destroy()
+
+        button_frame = Frame(popup, bg="#2F0160") 
+        button_frame.pack(side="bottom", fill="x", pady=20)
+
+        # Tombol Create, Update, Delete, dan Cancel
+        Button(button_frame, text="Create", command=create_action, bg="#28a745", fg="white").pack(side="left", fill="x", expand=True, padx=5)
+        Button(button_frame, text="Update", command=update_action, bg="#2196F3", fg="white").pack(side="left", fill="x", expand=True, padx=5)
+        Button(button_frame, text="Delete", command=delete_action, bg="red", fg="white").pack(side="left", fill="x", expand=True, padx=5)
+        Button(button_frame, text="Cancel", command=cancel_action, bg="black", fg="white").pack(side="left", fill="x", expand=True, padx=5)
+        
+            
+    def open_form(self, res_id, id, action):
+        # Membuka pop-up baru untuk form input
+        window = self.root
+        form_popup = Toplevel(window)
+        popup_width = 400
+        popup_height = 300
+        
+        position_top, position_left= self.middle(popup_height,popup_width)
+        form_popup.geometry(f"{popup_width}x{popup_height}+{position_left}+{position_top}")
+        form_popup.config(bg="#2F0160")
+        form_popup.grab_set()
+        form_popup.title(f"{action.capitalize()} Report for ID: {id}")
+
+        # Label dan input field untuk form
+        label_input = Label(form_popup, text=f"Enter detail to {action} Report:", bg="#2F0160", fg="white", font=("Arial", 12))
+        label_input.pack(pady=10)
+
+        # Input Paragraf
+        input_field = Text(form_popup, width=50, height=10, font=("Arial", 12), bd=3, relief="solid")
+        input_field.pack(pady=5, padx=10)  
+
+        # Fungsi Create and Update
+        def submit_create_action(id):
+            user_input = input_field.get("1.0", "end-1c")
+            if not user_input:
+                messagebox.showwarning("Input Error", "Data tidak boleh kosong.")
+                return
+            rc = ResourceControl()
+            berhasil = rc.create_report(res_id, id, user_input)
+            if berhasil:
+                messagebox.showinfo("Success", "Laporan berhasil dibuat.")
+            else:
+                messagebox.showerror("Failed", "Gagal membuat laporan.")
+            form_popup.destroy()  
+
+        def submit_update_action(id):
+            user_input = input_field.get("1.0", "end-1c") 
+            if not user_input:
+                messagebox.showwarning("Input Error", "Data tidak boleh kosong.")
+                return
+            rc = ResourceControl()
+            berhasil = rc.update_report(id, user_input)
+            if berhasil:
+                messagebox.showinfo("Success", "Laporan berhasil diperbarui.")
+            else:
+                messagebox.showerror("Failed", "Gagal memperbarui laporan.")
+            form_popup.destroy()  
+
+            # Tombol Submit 
+        if action == "create":
+            Button(form_popup, text="Submit Create", command=lambda: submit_create_action(id), bg="white", fg="#2F0160", font=("Arial", 12)).pack(pady=10)
+        elif action == "update":
+            Button(form_popup, text="Submit Update", command=lambda: submit_update_action(id), bg="white", fg="#2F0160", font=("Arial", 12)).pack(pady=10)
+
+    def see_report(self,id):
+        control = ResourceControl()
+        report = control.get_report_detail_id(id)
+
+        if report:  # Cek ada data/tidak
             popup = tk.Toplevel()
-            popup.geometry("300x300")
             popup.title("Laporan")
             popup.config(bg="#2F0160")
+            popup.grab_set()
+            popup.focus_set()
+
+            #Membuat Popup Berada Ditengah
+            position_top, position_left = self.middle(300, 100)
+            popup.geometry(f"300x300+{position_left-90}+{position_top+100}") 
             
-            # Frame untuk konten dan scrollbar
             frame = tk.Frame(popup)
             frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-            frame.pack_propagate(False)  # Menghentikan frame untuk menyesuaikan dengan konten
+            frame.pack_propagate(False)  
 
-            # Membuat widget Text untuk menampilkan laporan
+            # Frame tampil laporan
             text_box = tk.Text(frame, wrap="word", font=("Arial", 12), height=10, width=45, 
-                            bg="#2F0160", fg="white", bd=0, relief="flat")  # Menggunakan ungu dan tanpa border
-            text_box.insert(tk.END, report)  # Memasukkan laporan ke dalam Text box
+                            bg="#2F0160", fg="white", bd=0, relief="flat")  
+            text_box.insert(tk.END, report) 
             text_box.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-            # Menambahkan scrollbar vertikal
             scrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL, command=text_box.yview)
             scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-            # Menyambungkan scrollbar dengan Text box
             text_box.config(yscrollcommand=scrollbar.set)
+
+            # Membuat scroll hanya untuk pop up
+            def on_mouse_wheel(event):
+                """Tangani event scroll untuk text_box"""
+                text_box.yview_scroll(int(-1 * (event.delta / 120)), "units")
+                return "break"  
+
+            
+            text_box.bind("<MouseWheel>", on_mouse_wheel)  
+            text_box.bind("<Button-4>", lambda e: text_box.yview_scroll(-1, "units"))  
+            text_box.bind("<Button-5>", lambda e: text_box.yview_scroll(1, "units"))  
+
+        else:
+            popup = tk.Toplevel()
+            popup.geometry("375x100")
+            popup.title("Laporan")
+            position_top, position_left = self.middle(300, 100)
+            popup.geometry(f"300x100+{position_left-90}+{position_top+100}") 
+            popup.grab_set()
+            popup.config(bg="#2F0160")
+            
+            label = tk.Label(popup, text="Maaf, belum ada Laporan untuk Log ini", wraplength=300, bg="#2F0160", fg="white", font=("Arial", 12))
+            label.pack(pady=10)
+
+        
+        close_button = tk.Button(popup, text="Close", command=popup.destroy, bg="#2F0160", fg="white")
+        close_button.pack(side=tk.BOTTOM, pady=10) 
+            
+    
 
     def showTab(self, content_function):
         """Membersihkan konten tab sebelumnya dan menampilkan konten baru"""
@@ -965,6 +1136,3 @@ class UIResource:
         """Kembali ke halaman pertama"""
         self.secondPage.pack_forget()  
         self.firstPage.pack(fill="both", expand=True)  
-
-  
-        
