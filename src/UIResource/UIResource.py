@@ -40,6 +40,7 @@ class UIResource:
         self.firstPageScrollableFrame = tk.Frame(self.firstPageCanvas, bg='#2F0160')
         self.firstPageCanvas.create_window((0, 0), window=self.firstPageScrollableFrame, anchor="nw")
 
+        
         self.firstPageScrollableFrame.bind("<Configure>", lambda e: self.firstPageCanvas.configure(scrollregion=self.firstPageCanvas.bbox("all")))
 
         self.setupFirstPageContent()
@@ -66,6 +67,7 @@ class UIResource:
         
         self.updateResourceList()
         self.root.after(100, self.check1_size)
+
         
     def updateResourceList(self):
         """Memperbarui daftar resource di UI"""

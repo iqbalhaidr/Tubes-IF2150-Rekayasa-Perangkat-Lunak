@@ -15,15 +15,15 @@ class LogActivity:
         action_detail = ""
 
         if activity == "allocate":
-            action_detail = f"Alokasi {jumlah} unit ke {lokasi}" if lokasi else f"Alokasi {jumlah} unit"
+            action_detail = f"Alokasi {jumlah} unit ke {lokasi.upper()}" if lokasi else f"Alokasi {jumlah} unit"
         elif activity == "deallocate":
-            action_detail = f"Dealokasi {jumlah} unit dari {lokasi}" if lokasi else f"Dealokasi {jumlah} unit"
+            action_detail = f"Dealokasi {jumlah} unit dari {lokasi.upper()}" if lokasi else f"Dealokasi {jumlah} unit"
         elif activity == "increase":
             action_detail = f"Penambahan {jumlah} unit"
         elif activity == "decrease":
             action_detail = f"Pengurangan {jumlah} unit"
         elif activity == "distribute":
-            action_detail = f"Distribusi {jumlah} unit dari {lokasi} ke {tujuan}" if lokasi else f"Distribusi {jumlah} unit"
+            action_detail = f"Distribusi {jumlah} unit dari {lokasi.upper()} ke {tujuan.upper()}" if lokasi else f"Distribusi {jumlah} unit"
         else:
             action_detail = f"Aktivitas tidak dikenali"
 

@@ -1,4 +1,5 @@
 import sqlite3
+from LogActivity.log_activity import LogActivity
 
 class Inventaris:
     def __init__(self, db_name="SIMADA.db"):
@@ -30,10 +31,10 @@ class Inventaris:
         conn = self.connect()
         cur = conn.cursor()
         cur.execute('''
-            SELECT resource_id, quantity FROM Inventaris
+            SELECT resource_id, location ,quantity FROM Inventaris
             WHERE inventaris_id = ?
         ''', (inventaris_id, ))
-        resource_id, location_quantity = cur.fetchone()
+        resource_id, location, location_quantity = cur.fetchone()
 
         cur.execute('''
             SELECT quantity FROM Resources
@@ -66,6 +67,8 @@ class Inventaris:
             conn.commit()  
             conn.close()
             state = 1 if new_quantity_loc > 0 else 2
+            log = LogActivity()
+            log.log_new_activity(resource_id, "deallocate", quantity, True, location)
             print("gett")
             return state
         else:
@@ -91,16 +94,18 @@ class Inventaris:
         conn = self.connect()
         cur = conn.cursor()
         cur.execute('''
-            SELECT resource_id, quantity FROM Inventaris
+            SELECT resource_id, location ,quantity FROM Inventaris
             WHERE inventaris_id = ?
         ''', (inventaris_id, ))
-        resource_id, location_quantity = cur.fetchone()
+        resource_id, source_location ,location_quantity = cur.fetchone()
 
         cur.execute('''
             SELECT quantity, inventaris_id FROM Inventaris
             WHERE resource_id = ? AND location = ? 
         ''', (resource_id, location.upper() ))
         quantity_of_distributed_loc , id_distributed_loc = cur.fetchone()
+        if (id_distributed_loc == inventaris_id):
+            return 0
         new_qty_in_distributed_loc = quantity_of_distributed_loc + quantity
         new_loc_qty = location_quantity - quantity
         if new_loc_qty >= 0:
@@ -118,8 +123,13 @@ class Inventaris:
             ''', (new_qty_in_distributed_loc, id_distributed_loc))
             conn.commit()
             conn.close()
+            log = LogActivity()
+            log.log_new_activity(resource_id, "distribute", quantity, True, source_location, location)
             state = 1 if new_loc_qty > 0 else 2
+
             return state
+        else:
+            return 0
           
 
 
