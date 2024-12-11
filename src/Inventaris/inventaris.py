@@ -92,13 +92,13 @@ class Inventaris:
         cur = conn.cursor()
         cur.execute('''
             SELECT resource_id, quantity FROM Inventaris
-            WHERE inventaris_id 
+            WHERE inventaris_id = ?
         ''', (inventaris_id, ))
         resource_id, location_quantity = cur.fetchone()
 
         cur.execute('''
             SELECT quantity, inventaris_id FROM Inventaris
-            WHERE resource_id = ?, location = ? 
+            WHERE resource_id = ? AND location = ? 
         ''', (resource_id, location.upper() ))
         id_distributed_loc ,quantity_of_distributed_loc = cur.fetchone()
         new_qty_in_distributed_loc = quantity_of_distributed_loc + quantity
@@ -109,6 +109,7 @@ class Inventaris:
                 SET quantity = ?
                 WHERE inventaris_id = ?
             ''', (new_loc_qty, inventaris_id))
+            conn.commit()
 
             cur.execute('''
                 UPDATE inventaris
@@ -133,8 +134,6 @@ class Inventaris:
             WHERE resource_id = ?
         ''', (resource_id,  ))
         all_location = cur.fetchall()
-        print(f"resource_id {resource_id}")
-        print(f"ambil inv {all_location}")
 
         conn.close()
         return all_location ## formatnya inventaris_id, loc, qty
