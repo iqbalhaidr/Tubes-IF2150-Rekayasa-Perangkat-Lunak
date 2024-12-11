@@ -38,15 +38,35 @@ class ResourceManager:
             conn.close()
             return False  # Jika nama sudah ada (duplicate entry)
         
-    def delete_resource(self, id:int):
-        '''Menghapus resource yang diinginkan'''
-        conn = self.connect()
-        cur = conn.cursor()
-        cur.execute("DELETE FROM Resources WHERE id = ?", (id,))
-        conn.commit()
+    def delete_resource(self, id: int):
+        '''Menghapus resource berdasarkan ID'''
+        if not isinstance(id, int) or id <= 0:
+            print("ID tidak valid.")
+            return False
 
-        conn.close()
-        return True
+        try:
+            # Membuka koneksi ke database
+            with self.connect() as conn:
+                cur = conn.cursor()  # Membuat cursor
+
+                # Mengecek apakah ID ada di tabel
+                cur.execute("SELECT 1 FROM Resources WHERE id = ?", (id,))
+                if cur.fetchone() is None:
+                    print(f"Resource dengan ID {id} tidak ditemukan.")
+                    return False
+
+                # Menjalankan query untuk menghapus resource
+                cur.execute("DELETE FROM Resources WHERE id = ?", (id,))
+                conn.commit()
+                print(f"Berhasil menghapus resource dengan ID {id}.")
+                return True
+
+        except Exception as e:
+            # Menangani kesalahan
+            print(f"Terjadi kesalahan: {e}")
+            return False
+
+
 
     def add_or_subtract_resource_quantity(self, id, quantity, add: bool):
         '''Menambahkan jumah quantity yang diinginkan pada resource'''
@@ -100,6 +120,7 @@ class ResourceManager:
         list_of_resource = cur.fetchall()
         conn = self.connect()
         cur = conn.cursor()
+        print(list_of_resource)
         conn.close()  
         
         return list_of_resource
@@ -132,6 +153,8 @@ class ResourceManager:
             cur.execute("SELECT * FROM Resources WHERE id = ?", (resource_id,))
             new_rec=  cur.fetchone()
             print(new_rec)
+            log = LogActivity()
+            log.log_new_activity(resource_id, "allocate", quantity, True, location.upper())
             
             conn.close()
             return state

@@ -16,12 +16,10 @@ class Inventaris:
             INSERT INTO Inventaris (resource_id, location, quantity)
             VALUES (?, ?, ?)
         """, (resource_id, location.upper(), quantity))
-        conn.commit()  
-        
-        cur.execute("SELECT * FROM Inventaris WHERE resource_id = ?", (resource_id,))
-        new_rec =  cur.fetchone()
-        print(f"inventaris {new_rec}")
-            
+        print(location.upper())
+        print(quantity)
+        print(resource_id)
+        conn.commit()
         conn.close()
         return True
         
@@ -90,46 +88,39 @@ class Inventaris:
 
     def distribute_to(self, inventaris_id: int, location: str, quantity:int):
         """Mendistribusikan sumber daya dari satu lokasi ke lokasi lain."""
-        try:    
-            conn = self.connect()
-            cur = conn.cursor()
-            cur.execute('''
-                SELECT resource_id, quantity FROM Inventaris
-                WHERE inventaris_id = ?
-            ''', (inventaris_id, ))
-            resource_id, location_quantity = cur.fetchone()
-            print(f"idresource: {resource_id}")
-            print(f"Locquantity: {location_quantity}")
-            cur.execute('''
-                SELECT inventaris_id, quantity FROM Inventaris
-                WHERE resource_id = ? AND location = ?
-            ''', (resource_id, location.upper() ))
-            id_distributed_loc, quantity_of_distributed_loc = cur.fetchone()
-            print(f"invid: {id_distributed_loc}")
-            print(f"quantity: {quantity_of_distributed_loc}")
-            new_qty_in_distributed_loc = quantity_of_distributed_loc + quantity
-            new_loc_qty = location_quantity - quantity
-            if new_loc_qty >= 0:
-                cur.execute('''
-                    UPDATE inventaris
-                    SET quantity = ?
-                    WHERE inventaris_id = ?
-                ''', (new_loc_qty, inventaris_id))
-                conn.commit()
+        conn = self.connect()
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT resource_id, quantity FROM Inventaris
+            WHERE inventaris_id = ?
+        ''', (inventaris_id, ))
+        resource_id, location_quantity = cur.fetchone()
 
-                cur.execute('''
-                    UPDATE inventaris
-                    SET quantity = ?
-                    WHERE inventaris_id = ?
-                ''', (new_qty_in_distributed_loc, id_distributed_loc))
-                conn.commit()
-                conn.close()
-                state = 1 if new_loc_qty > 0 else 2
-                return state
-            else:
-                return 0
-        except (ValueError, TypeError):
-            return 0
+        cur.execute('''
+            SELECT quantity, inventaris_id FROM Inventaris
+            WHERE resource_id = ? AND location = ? 
+        ''', (resource_id, location.upper() ))
+        id_distributed_loc ,quantity_of_distributed_loc = cur.fetchone()
+        new_qty_in_distributed_loc = quantity_of_distributed_loc + quantity
+        new_loc_qty = location_quantity - quantity
+        if new_loc_qty >= 0:
+            cur.execute('''
+                UPDATE inventaris
+                SET quantity = ?
+                WHERE inventaris_id = ?
+            ''', (new_loc_qty, inventaris_id))
+            conn.commit()
+
+            cur.execute('''
+                UPDATE inventaris
+                SET quantity = ?
+                WHERE inventaris_id = ?
+            ''', (new_qty_in_distributed_loc, id_distributed_loc))
+            conn.commit()
+            conn.close()
+            state = 1 if new_loc_qty > 0 else 2
+            return state
+          
 
 
 

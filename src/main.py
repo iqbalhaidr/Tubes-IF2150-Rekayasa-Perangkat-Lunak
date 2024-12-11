@@ -1,5 +1,4 @@
 # main.py
-from make_db import create_tables
 from UIResource.UIResource import UIResource
 
 from ResourceManager.resource_manager import ResourceManager
