@@ -1,5 +1,4 @@
 # main.py
-
 from UIResource.UIResource import UIResource
 
 from ResourceManager.resource_manager import ResourceManager
