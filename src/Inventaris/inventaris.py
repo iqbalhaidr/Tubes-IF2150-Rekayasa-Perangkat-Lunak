@@ -9,18 +9,26 @@ class Inventaris:
         """Membuat koneksi ke database."""
         return sqlite3.connect(self.db_name)
 
-    def allocate(self, resource_id: int, quantity: int, location: str):
+    def allocate(self, resource_id: int, quantity: int, location: str, isExist: bool):
         """Mengalokasikan sumber daya ke lokasi tertentu."""
         conn = self.connect()
         cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO Inventaris (resource_id, location, quantity)
-            VALUES (?, ?, ?)
-        """, (resource_id, location.upper(), quantity))
+        if (isExist):
+            cur.execute('''
+                UPDATE inventaris
+                SET quantity = ?
+                WHERE resource_id = ? AND location = ?
+            ''', (quantity, resource_id, location))
+            conn.commit()
+        else:
+            cur.execute("""
+                INSERT INTO Inventaris (resource_id, location, quantity)
+                VALUES (?, ?, ?)
+            """, (resource_id, location.upper(), quantity))
+            conn.commit()
         print(location.upper())
         print(quantity)
         print(resource_id)
-        conn.commit()
         conn.close()
         return True
         

@@ -139,24 +139,29 @@ class ResourceManager:
         
         cur.execute("SELECT * FROM Inventaris WHERE location = ? AND resource_id = ?", (location.upper(), resource_id))
         locationArr = cur.fetchall()
-        if  len(locationArr)>0:
-            conn.close()
-            return False
+        
+        inven = Inventaris()
+        isExist = False
+        if len(locationArr)>0:
+            isExist = True
+            allocQuantity = quantity + locationArr[0][3]
+            state = inven.allocate(resource_id, allocQuantity, location.upper(), isExist)    
+            print("masuk") 
         else:
-            inven = Inventaris()
-            state = inven.allocate(resource_id, quantity, location.upper())
-            updated = curr_quantity-quantity
-            print(updated)
-            cur.execute("UPDATE Resources SET quantity = ? WHERE id = ?", (updated, resource_id))
-            conn.commit()
+            state = inven.allocate(resource_id, quantity, location.upper(), isExist)    
             
-            cur.execute("SELECT * FROM Resources WHERE id = ?", (resource_id,))
-            new_rec=  cur.fetchone()
-            print(new_rec)
-            log = LogActivity()
-            log.log_new_activity(resource_id, "allocate", quantity, True, location.upper())
-            
-            conn.close()
-            return state
+        updated = curr_quantity-quantity
+        print(updated)
+        cur.execute("UPDATE Resources SET quantity = ? WHERE id = ?", (updated, resource_id))
+        conn.commit()
+    
+        cur.execute("SELECT * FROM Resources WHERE id = ?", (resource_id,))
+        new_rec=  cur.fetchone()
+        print(new_rec)
+        log = LogActivity()
+        log.log_new_activity(resource_id, "allocate", quantity, True, location.upper())
+        
+        conn.close()
+        return state
 
 
