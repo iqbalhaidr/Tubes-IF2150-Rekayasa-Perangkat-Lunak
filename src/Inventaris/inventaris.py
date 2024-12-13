@@ -30,59 +30,30 @@ class Inventaris:
         print(quantity)
         print(resource_id)
         conn.close()
-        return True
+        return 2
         
 
-    def deallocate(self, inventaris_id:int, quantity:int):
-        print(f"quantity; {quantity}")
+    def deallocate(self, resource_id: int, inventaris_id:int, new_quantity_loc: int, new_quantity_resource: int):
         """Menghapus alokasi sumber daya dari lokasi tertentu."""        
         conn = self.connect()
         cur = conn.cursor()
+        
         cur.execute('''
-            SELECT resource_id, location ,quantity FROM Inventaris
+            UPDATE inventaris
+            SET quantity = ?
             WHERE inventaris_id = ?
-        ''', (inventaris_id, ))
-        resource_id, location, location_quantity = cur.fetchone()
+        ''', (new_quantity_loc, inventaris_id))
+        conn.commit()  
 
         cur.execute('''
-            SELECT quantity FROM Resources
-            WHERE id = ? 
-        ''', (resource_id,))
-        resource_qty = cur.fetchone()
-        print(resource_qty[0])
-
-        #state 0 gagal
-        #state 1 Berhasil dan tidak nol
-        #state 2 Berhasil dan 0
-
-        state =0 
-        # Kurangi jumlah di lokasi
-        new_quantity_loc = location_quantity - quantity
-        if new_quantity_loc>=0:
-            new_quantity_resource = resource_qty[0] + quantity
-            cur.execute('''
-                UPDATE inventaris
-                SET quantity = ?
-                WHERE inventaris_id = ?
-            ''', (new_quantity_loc, inventaris_id))
-            conn.commit()  
-
-            cur.execute('''
-                UPDATE Resources
-                SET quantity = ?
-                WHERE id = ?
-            ''', (new_quantity_resource, resource_id))
-            conn.commit()  
-            conn.close()
-            state = 1 if new_quantity_loc > 0 else 2
-            log = LogActivity()
-            log.log_new_activity(resource_id, "deallocate", quantity, True, location)
-            print("gett")
-            return state
-        else:
-            conn.close()
-            return 0
-
+            UPDATE Resources
+            SET quantity = ?
+            WHERE id = ?
+        ''', (new_quantity_resource, resource_id))
+        conn.commit()  
+        conn.close()
+    
+            
 
     def delete_location_zero_loc_qty (self, inventaris_id: int):
         conn = self.connect()
@@ -93,7 +64,7 @@ class Inventaris:
         ''', (inventaris_id,))
         conn.commit()
         conn.close()
-        return True
+        return 999
 
               
 
@@ -138,6 +109,25 @@ class Inventaris:
             return state
         else:
             return 0
+        
+    def distribute_to(self, inventaris_id: int, id_distributed_loc: int, new_loc_qty: str,  new_qty_in_distributed_loc:int):
+        """Mendistribusikan sumber daya dari satu lokasi ke lokasi lain."""
+        conn = self.connect()
+        cur = conn.cursor()
+        cur.execute('''
+            UPDATE inventaris
+            SET quantity = ?
+            WHERE inventaris_id = ?
+        ''', (new_loc_qty, inventaris_id))
+        conn.commit()
+
+        cur.execute('''
+            UPDATE inventaris
+            SET quantity = ?
+            WHERE inventaris_id = ?
+        ''', (new_qty_in_distributed_loc, id_distributed_loc))
+        conn.commit()
+        conn.close()
           
 
 
@@ -145,6 +135,7 @@ class Inventaris:
 
     def get_all_allocation_by_id(self, resource_id: int):
         """Mengambil semua alokasi untuk sumber daya tertentu."""
+        print(f"r = {resource_id}")
         conn = self.connect()
         cur = conn.cursor()
         cur.execute('''

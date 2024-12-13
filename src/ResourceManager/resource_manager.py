@@ -30,7 +30,7 @@ class ResourceManager:
             cur.execute("""
             INSERT INTO Resources (name, quantity, total_quantity)
             VALUES (?, ?, ?)
-            """, (name, quantity, quantity))
+            """, (name.upper(), quantity, quantity))
             conn.commit()  # simpan ke database
             conn.close()
             return True #berhasil ditambahkan
@@ -66,8 +66,6 @@ class ResourceManager:
             print(f"Terjadi kesalahan: {e}")
             return False
 
-
-
     def add_or_subtract_resource_quantity(self, id, quantity, add: bool):
         '''Menambahkan jumah quantity yang diinginkan pada resource'''
         conn = self.connect()
@@ -78,12 +76,16 @@ class ResourceManager:
 
         current_quantity = existing_resource[2]  
         total=existing_resource[3]
+        
+        if (quantity < 0):
+            return False
+        
         new_quantity=0
         if (add):
             new_quantity = current_quantity + quantity
             total+=quantity
         else:
-            if current_quantity - quantity<0:
+            if current_quantity - quantity < 0:
                 return False
             new_quantity = current_quantity - quantity
             total -= quantity
@@ -92,6 +94,7 @@ class ResourceManager:
         id_resource = existing_resource[0]
         conn.commit() 
         conn.close()
+        
         log = LogActivity()
         if add:
             log.log_new_activity(id_resource, "increase", quantity, False)
@@ -133,9 +136,10 @@ class ResourceManager:
         resource=  cur.fetchone()
         curr_quantity= resource[2]
 
+        # Kasus quantity melebihi total quantity
         if curr_quantity - quantity < 0 :
             conn.close()
-            return False
+            return 1
         
         cur.execute("SELECT * FROM Inventaris WHERE location = ? AND resource_id = ?", (location.upper(), resource_id))
         locationArr = cur.fetchall()
@@ -163,5 +167,99 @@ class ResourceManager:
         
         conn.close()
         return state
+    
+    def deallocate_manager(self, inventaris_id:int, quantity:int, isDelete: bool):
+        print(f"quantity; {quantity}")
+        """Menghapus alokasi sumber daya dari lokasi tertentu."""        
+        conn = self.connect()
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT resource_id, location ,quantity FROM Inventaris
+            WHERE inventaris_id = ?
+        ''', (inventaris_id, ))
+        resource_id, location, location_quantity = cur.fetchone()
+
+        cur.execute('''
+            SELECT quantity FROM Resources
+            WHERE id = ? 
+        ''', (resource_id,))
+        resource_qty = cur.fetchone()
+        print(resource_qty[0])
+
+        inven = Inventaris()
+        # Kurangi jumlah di lokasi
+        new_quantity_loc = location_quantity - quantity
+        if new_quantity_loc < 0:
+            conn.close()
+            return 1
+        else:
+            new_quantity_resource = resource_qty[0] + quantity
+            inven.deallocate(resource_id, inventaris_id, new_quantity_loc, new_quantity_resource)
+            
+            log = LogActivity()
+            log.log_new_activity(resource_id, "deallocate", quantity, True, location)
+            print("gett")
+            
+            conn.close()
+            if (isDelete):
+                return inven.delete_location_zero_loc_qty(inventaris_id)
+            else:
+                return 2
+
+        
+    def distribute_manager(self, inventaris_id: int, location: str, quantity:int, isDelete: bool):
+        conn = self.connect()
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT resource_id, location ,quantity FROM Inventaris
+            WHERE inventaris_id = ?
+        ''', (inventaris_id, ))
+        resource_id, source_location ,location_quantity = cur.fetchone()
+
+        cur.execute('''
+            SELECT quantity, inventaris_id FROM Inventaris
+            WHERE resource_id = ? AND location = ? 
+        ''', (resource_id, location.upper() ))
+        result = cur.fetchone()
+        
+        # Kasus tidak ada lokasi tujuan
+        if not result:
+            return 1
+        
+        quantity_of_distributed_loc , id_distributed_loc = result
+        
+        # Kasus mengirim ke lokasi sendiri
+        if (id_distributed_loc == inventaris_id):
+            return 2
+        
+        new_qty_in_distributed_loc = quantity_of_distributed_loc + quantity
+        new_loc_qty = location_quantity - quantity
+        inven = Inventaris()
+        if new_loc_qty < 0:
+            conn.close()
+            # Kasus jumlah distribusi melebihi quantity lokasi
+            return 3
+        else:
+            inven.distribute_to(inventaris_id, id_distributed_loc, new_loc_qty,  new_qty_in_distributed_loc)
+            log = LogActivity()
+            log.log_new_activity(resource_id, "distribute", quantity, True, source_location, location)
+            if (isDelete):
+                # Kasus delete lokasi
+                return inven.delete_location_zero_loc_qty(inventaris_id)
+            else:
+                return 4
+            
+        
+        
+        
+    
+    def get_all_inventaris_manager(self, resource_id):
+        print(f"resource_id: {resource_id}")
+        inven = Inventaris()
+        return inven.get_all_allocation_by_id(resource_id)
+    
+    def delete_location(self, inventaris_id):
+        inven = Inventaris()
+        return inven.delete_location_zero_loc_qty(inventaris_id)
 
 

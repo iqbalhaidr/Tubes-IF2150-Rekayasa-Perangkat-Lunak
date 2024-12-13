@@ -54,7 +54,6 @@ class UIResource:
 
     # Konten Daftar Resource
     def setupFirstPageContent(self):
-        """Membuat halaman utama UI dengan menyesuaikan posisi elemen"""
         headerAwal = tk.Label(self.firstPageScrollableFrame, text="SIMADA", font=("Arial", 20, "bold"), bg='#2F0160', fg='yellow')
         headerAwal.pack(pady=(30, 0), anchor="w", padx=(50, 10))  
 
@@ -157,7 +156,7 @@ class UIResource:
         createWindow = tk.Toplevel(self.root)
         createWindow.title("Tambah Resource")
         createWindow.config(bg='#2F0160')
-        createWindow.geometry("510x310")  # Sesuaikan ukuran pop-up
+        createWindow.geometry("510x310")  
 
         # Load gambar input field
         inputFieldBG = tk.PhotoImage(file="img/inputField.png")
@@ -218,13 +217,15 @@ class UIResource:
         try:
             quantity = int(quantityEntry.get())
             isSuccess = self.resourceControl.create_new_resource(name, quantity)
-            if isSuccess:
+            if isSuccess == 0:
+                messagebox.showwarning("Fail", f"Quantity yang dimasukkan tidak valid!")
+            elif isSuccess == 1:
+                messagebox.showwarning("Fail", f"Quantity yang dimasukkan melebihi total quantity!")
+            else:
                 self.updateResourceList()
                 messagebox.showinfo("Success", f"Resource '{name}' berhasil ditambahkan dengan jumlah {quantity}.")
-            else:
-                messagebox.showwarning("Fail", f"Resource '{name}' sudah ada dalam sistem.")
         except ValueError:
-            messagebox.showerror("Error", "Jumlah harus berupa angka yang valid!")
+            messagebox.showerror("Error", "Quantity yang dimasukkan tidak valid!")
         window.destroy()
     
     # PopUp UI untuk alokasi resource
@@ -235,7 +236,6 @@ class UIResource:
         allocateWindow.geometry("510x265")
 
         inputFieldBG = tk.PhotoImage(file="img/inputField.png")
-        nameEntry = resource_name
 
         headerPage = tk.Label(allocateWindow, 
                           text=f"Allocate Resource {resource_name}",  # Nama resource disisipkan ke dalam teks
@@ -296,13 +296,15 @@ class UIResource:
             location = newLocationEntry.get()
             quantity = int(quantityEntry.get())
             isSuccess = self.resourceControl.allocate(resource_id, quantity, location)
-            if isSuccess:
+            if isSuccess == 0:
+                messagebox.showinfo("Fail", f"Quantity yang dialokasikan tidak valid!")
+            elif isSuccess == 1:
+                messagebox.showinfo("Fail", f"Quantity yang dialokasikan melebihi total quantity!")
+            else:
                 self.updateResourceList()
                 messagebox.showinfo("Success", f"Resource ID {resource_id} berhasil ditambahkan dengan jumlah {quantity}.")
-            else:
-                messagebox.showinfo("Fail", f"Quantity yang dialokasikan melebihi total quantity")
         except ValueError:
-            messagebox.showerror("Error", "Jumlah harus berupa angka yang valid!")
+            messagebox.showerror("Error", "Quantity yang dialokasikan tidak valid!")
         allocateWindow.destroy()
 
     # PopUp UI untuk update resource
@@ -405,17 +407,16 @@ class UIResource:
             new_quantity = int(newQuantityEntry.get())
             isSuccess = self.resourceControl.update_resource_quantity(resource_id, new_quantity, add)
             if (isSuccess):
-                messagebox.showinfo("Success", f" Quantity resource dengan Resouce ID {resource_id} berhasil di-update")
+                messagebox.showinfo("Success", f" Quantity resource dengan Resouce ID {resource_id} berhasil di-update.")
                 self.updateResourceList()
             else:
-                messagebox.showinfo("Fail", f" Quantity resource dengan Resouce ID {resource_id} gagal di-update")
+                messagebox.showinfo("Fail", f" Quantity yang dimasukkan tidak valid!")
         except ValueError:
-            messagebox.showerror("Error", "Jumlah harus berupa angka yang valid!")
+            messagebox.showerror("Error", "Quantity yang dimasukkan tidak valid!")
         updateWindow.destroy()
 
     # Mekanisme delete Resource
     def deleteResource(self, resource_id, resource_name ):   
-        print(f"Delete resource {resource_name}")
         isSuccess = self.resourceControl.delete_available_resource(resource_id)
         
         self.updateResourceList()
@@ -711,21 +712,20 @@ class UIResource:
     def deallocateResource(self, inventaris_id, resource_id, deallocQuantityEntry, isDelete, deallocateWindow):
         try:
             quantity = int(deallocQuantityEntry.get())
-            if (isDelete):
-                isSuccess = self.resourceControl.delete_location(inventaris_id)
+            isSuccess = self.resourceControl.deallocate(inventaris_id, quantity, isDelete)
+            if isSuccess == 0:
+                messagebox.showwarning("Fail", f"Quantity yang dialokasikan tidak valid!")
+            elif isSuccess == 1:
+                messagebox.showwarning("Fail", f"Quantity yang dialokasikan melebihi total quantity!")
+            elif isSuccess == 2:
+                messagebox.showinfo("Informasi", f"Resource pada lokasi didealokasi untuk sejumlah {quantity}.")
+                self.updateInventaris(resource_id)
             else:
-                isSuccess = self.resourceControl.deallocate(inventaris_id, quantity)
-            if isSuccess:
                 if (isDelete):
                     messagebox.showinfo("Informasi", f"Resource pada lokasi berhasil dihapus.")
-                else:
-                    messagebox.showinfo("Informasi", f"Resource pada lokasi didealokasi untuk sejumlah {quantity}.")
-                self.updateInventaris(resource_id)
-                
-            else:
-                messagebox.showwarning("Peringatan", f"Quantity yang dialokasikan melebihi total quantity")
+                    self.updateInventaris(resource_id)
         except ValueError:
-            messagebox.showerror("Error", "Jumlah harus berupa angka yang valid!")
+            messagebox.showwarning("Fail", "Quantity yang didistribusikan tidak valid!")
             
         deallocateWindow.destroy()
         
@@ -833,24 +833,28 @@ class UIResource:
         try:
             Tolocation = ToLocationEntry.get()
             quantity = int(quantityEntry.get())
-            if (isDelete):
-                isSuccess = self.resourceControl.delete_location(inventaris_id)
-            else:
-                isSuccess = self.resourceControl.distribute_to(inventaris_id, Tolocation, quantity)
-            if isSuccess:
-                if isDelete:
-                    messagebox.showinfo("Informasi", f"semua quantity resource di {location} berhasil dipindahkan ke {Tolocation} dan lokasi dihapus")
-                else:
-                    messagebox.showinfo("Informasi", f"quantity resource sejumlah {quantity} dari {location} berhasil dipindahkan ke {Tolocation}")
+            isSuccess = self.resourceControl.distribute_to(inventaris_id, Tolocation, quantity, isDelete)
+            if isSuccess == 0:
+                messagebox.showwarning("Fail", f"Quantity yang didistribusikan tidak valid!")
+            elif isSuccess == 1:
+                messagebox.showwarning("Fail", f"lokasi tidak ditemukan!")
+            elif isSuccess == 2:
+                messagebox.showwarning("Fail", f"lokasi tujuan tidak boleh sama!")
+            elif isSuccess == 3:
+                messagebox.showwarning("Fail", f"Quantity yang didistribusikan melebihi total quantity!")
+            elif isSuccess == 4:
+                messagebox.showinfo("Informasi", f"quantity resource sejumlah {quantity} dari {location} berhasil dipindahkan ke {Tolocation}.")
                 self.updateInventaris(resource_id)
             else:
-                messagebox.showwarning("Peringatan", f"lokasi atau quantity tidak valid")
+                if isDelete:
+                    messagebox.showinfo("Informasi", f"semua quantity resource di {location} berhasil dipindahkan ke {Tolocation} dan lokasi dihapus.")
+                    self.updateInventaris(resource_id)
         except ValueError:
-            messagebox.showerror("Error", "lokasi dan quantity tidak valid!")
+            messagebox.showwarning("Fail", "Quantity yang didistribusikan tidak valid!")
         distributeWindow.destroy()
         
+    # Tampilan konten logActivity
     def showLogActivityContent(self, resource_id):
-        """Menampilkan konten tab I"""
         self.logActivity_canvases = []
         
         # Bersihkan tab 
