@@ -40,13 +40,13 @@ _Modul yang digunakan pada program ini_
 - sys
 
 ## Pembagian Tugas
-| NIM      | Nama                            | Fitur                                                           |
-| -------- | ------------------------------- | --------------------------------------------------------------- |
-| 13523051 | Ferdinand Gabe Tua Sinaga       | Database, ResourceManager, UIResource, LogActivity, ResourceControl, Report, ReportManager |
-| 13523023 | Muhammad Aufa Farabi            | UIResource                                                      |
-| 13523037 | Buege Mahara Putra              |                                                                 |
-| 13523117 | Ferdin Arsenarendra Purtadi     | LogActivity, Report, ReportManager, ResourceControl, Inventaris |
-| 13523111 | Muhammad Iqbal Haidar           |                                                                 |
+| NIM      | Nama                            | Tugas                                                                                                        |
+| -------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 13523051 | Ferdinand Gabe Tua Sinaga       | Database, ResourceManager, LogActivity, ResourceControl, Report, ReportManager, UIResource (Log Activity)    |
+| 13523023 | Muhammad Aufa Farabi            | UIResource (Daftar Resource, Daftar Inventaris), ResourceControl, Inventaris, ResourceManager                |
+| 13523037 | Buege Mahara Putra              | Dokumen                                                                                                      |
+| 13523117 | Ferdin Arsenarendra Purtadi     | LogActivity, Report, ReportManager, ResourceControl, Inventaris                                              |
+| 13523111 | Muhammad Iqbal Haidar           | ReportManager, ResourceControl                                                                               |
 
 ## Tabel Basis Data
 <table border="0" style="border-collapse: collapse; text-align: left;">
