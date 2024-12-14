@@ -220,7 +220,7 @@ class UIResource:
             if isSuccess == 0:
                 messagebox.showwarning("Fail", f"Quantity yang dimasukkan tidak valid!")
             elif isSuccess == 1:
-                messagebox.showwarning("Fail", f"Quantity yang dimasukkan melebihi total quantity!")
+                messagebox.showwarning("Fail", f"Resource sudah terdaftar dalam sistem!")
             else:
                 self.updateResourceList()
                 messagebox.showinfo("Success", f"Resource '{name}' berhasil ditambahkan dengan jumlah {quantity}.")

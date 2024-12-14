@@ -12,8 +12,8 @@ class ResourceControl:
         self.inventory = Inventaris(db_name)
 
     def create_new_resource(self, resource_name: str, resource_quantity: int):
-        if (resource_quantity <= 0 or isinstance(resource_quantity, int)):
-            return False
+        if (resource_quantity <= 0):
+            return 0
         return self.resource_manager.create_resource(resource_name, resource_quantity)
     
     def get_all_resource_information(self):

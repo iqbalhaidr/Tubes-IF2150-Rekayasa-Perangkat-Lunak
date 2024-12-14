@@ -33,10 +33,10 @@ class ResourceManager:
             """, (name.upper(), quantity, quantity))
             conn.commit()  # simpan ke database
             conn.close()
-            return True #berhasil ditambahkan
+            return 2 #berhasil ditambahkan
         else :
             conn.close()
-            return False  # Jika nama sudah ada (duplicate entry)
+            return 1  # Jika nama sudah ada (duplicate entry)
         
     def delete_resource(self, id: int):
         '''Menghapus resource berdasarkan ID'''
