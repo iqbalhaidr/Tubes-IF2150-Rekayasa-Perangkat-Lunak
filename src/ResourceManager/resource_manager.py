@@ -249,17 +249,16 @@ class ResourceManager:
             else:
                 return 4
             
-        
-        
-        
-    
     def get_all_inventaris_manager(self, resource_id):
-        print(f"resource_id: {resource_id}")
         inven = Inventaris()
         return inven.get_all_allocation_by_id(resource_id)
     
     def delete_location(self, inventaris_id):
         inven = Inventaris()
         return inven.delete_location_zero_loc_qty(inventaris_id)
+    
+    def get_log_activity_manager(self, resource_id):
+        log = LogActivity()
+        return log.get_log_activity(resource_id)
 
 

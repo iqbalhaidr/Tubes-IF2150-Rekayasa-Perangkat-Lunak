@@ -130,12 +130,8 @@ class Inventaris:
         conn.close()
           
 
-
-
-
     def get_all_allocation_by_id(self, resource_id: int):
         """Mengambil semua alokasi untuk sumber daya tertentu."""
-        print(f"r = {resource_id}")
         conn = self.connect()
         cur = conn.cursor()
         cur.execute('''

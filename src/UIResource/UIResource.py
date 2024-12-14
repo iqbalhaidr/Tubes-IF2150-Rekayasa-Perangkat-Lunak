@@ -580,10 +580,8 @@ class UIResource:
         Inventaris = self.resourceControl.get_all_inventaris(resource_id)
         
         if Inventaris:
-            print(f"inventaris {Inventaris}")
             for Inventory in Inventaris:
                 self.createInventoryRow(Inventory)
-            print(f"hayo {updatedResource}")
             self.currentQuantity.config(text=f"{updatedResource[2]} / {updatedResource[3]}") 
         else:
             # Jika tidak ada inventaris
@@ -730,11 +728,11 @@ class UIResource:
             elif isSuccess == 1:
                 messagebox.showwarning("Fail", f"Quantity yang dialokasikan melebihi total quantity!")
             elif isSuccess == 2:
-                messagebox.showinfo("Informasi", f"Resource pada lokasi didealokasi untuk sejumlah {quantity}.")
+                messagebox.showinfo("Success", f"Resource pada lokasi didealokasi untuk sejumlah {quantity}.")
                 self.updateInventaris(resource_id)
             else:
                 if (isDelete):
-                    messagebox.showinfo("Informasi", f"Resource pada lokasi berhasil dihapus.")
+                    messagebox.showinfo("Success", f"Resource pada lokasi berhasil dihapus.")
                     self.updateInventaris(resource_id)
         except ValueError:
             messagebox.showwarning("Fail", "Quantity yang didistribusikan tidak valid!")
@@ -861,11 +859,11 @@ class UIResource:
             elif isSuccess == 3:
                 messagebox.showerror("Fail", f"Quantity yang didistribusikan melebihi total quantity!")
             elif isSuccess == 4:
-                messagebox.showinfo("Informasi", f"quantity resource sejumlah {quantity} dari {location} berhasil dipindahkan ke {Tolocation}.")
+                messagebox.showinfo("Success", f"Quantity  sejumlah {quantity} dari {location} berhasil dipindahkan ke {Tolocation}.")
                 self.updateInventaris(resource_id)
             else:
                 if isDelete:
-                    messagebox.showinfo("Informasi", f"semua quantity resource di {location} berhasil dipindahkan ke {Tolocation} dan lokasi dihapus.")
+                    messagebox.showinfo("Success", f"Semua quantity resource di {location} berhasil dipindahkan ke {Tolocation} dan lokasi dihapus.")
                     self.updateInventaris(resource_id)
         except ValueError:
             messagebox.showerror("Fail", "Quantity yang didistribusikan tidak valid!")
