@@ -216,7 +216,7 @@ class UIResource:
         name = nameEntry.get()
         try:
             quantity = int(quantityEntry.get())
-            isSuccess = self.resourceControl.create_new_resource(name, quantity)
+            isSuccess = self.resourceControl.create_new_resource(name.upper(), quantity)
             if isSuccess == 0:
                 messagebox.showwarning("Fail", f"Quantity yang dimasukkan tidak valid!")
             elif isSuccess == 1:
@@ -283,26 +283,26 @@ class UIResource:
             activeforeground="yellow",
             relief="flat",
             font=("Arial", 12),
-            command=lambda: self.allocateResourceQuantity(resource_id, newLocationEntry, quantityEntry, allocateWindow)
+            command=lambda: self.allocateResourceQuantity(resource_id, newLocationEntry, quantityEntry, resource_name, allocateWindow)
         )
         submitButton.pack(anchor="w", padx=(360, 25), pady=(10, 10))
         
         allocateWindow.inputFieldBG = inputFieldBG
         
-    def allocateResourceQuantity(self, ResourceID, newLocationEntry, quantityEntry, allocateWindow):
+    def allocateResourceQuantity(self, ResourceID, newLocationEntry, quantityEntry, resource_name,  allocateWindow):
         """Mengupdate jumlah resource."""        
         resource_id = ResourceID
         try:
             location = newLocationEntry.get()
             quantity = int(quantityEntry.get())
-            isSuccess = self.resourceControl.allocate(resource_id, quantity, location)
+            isSuccess = self.resourceControl.allocate(resource_id, quantity, location.upper())
             if isSuccess == 0:
                 messagebox.showinfo("Fail", f"Quantity yang dialokasikan tidak valid!")
             elif isSuccess == 1:
                 messagebox.showinfo("Fail", f"Quantity yang dialokasikan melebihi total quantity!")
             else:
                 self.updateResourceList()
-                messagebox.showinfo("Success", f"Resource ID {resource_id} berhasil ditambahkan dengan jumlah {quantity}.")
+                messagebox.showinfo("Success", f"Resource  {resource_name} berhasil ditambahkan dengan jumlah {quantity}.")
         except ValueError:
             messagebox.showerror("Error", "Quantity yang dialokasikan tidak valid!")
         allocateWindow.destroy()
@@ -831,7 +831,7 @@ class UIResource:
     def distributeInventory(self, inventaris_id, resource_id, location, ToLocationEntry, quantityEntry, isDelete, distributeWindow):
         """Mengupdate jumlah resource."""        
         try:
-            Tolocation = ToLocationEntry.get()
+            Tolocation = ToLocationEntry.get().upper()
             quantity = int(quantityEntry.get())
             isSuccess = self.resourceControl.distribute_to(inventaris_id, Tolocation, quantity, isDelete)
             if isSuccess == 0:

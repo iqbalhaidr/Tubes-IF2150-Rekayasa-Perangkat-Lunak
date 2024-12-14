@@ -30,7 +30,7 @@ class ResourceManager:
             cur.execute("""
             INSERT INTO Resources (name, quantity, total_quantity)
             VALUES (?, ?, ?)
-            """, (name.upper(), quantity, quantity))
+            """, (name, quantity, quantity))
             conn.commit()  # simpan ke database
             conn.close()
             return 2 #berhasil ditambahkan

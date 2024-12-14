@@ -36,13 +36,13 @@ class ResourceControl:
 
     def deallocate(self,inventaris_id, quantity, isDelete):
         '''Melakukan dealokasi terhadap sumberdaya di tempat tertentu'''
-        if (quantity < 0):
+        if (quantity <= 0):
             return 0
         return self.resource_manager.deallocate_manager(inventaris_id, quantity, isDelete)
 
     def distribute_to(self, inventaris_id, location, quantity, isDelete):
         '''Melakukan distribusi sumber daya dari satu tempat ke tempat lain'''
-        if (quantity < 0):
+        if (quantity <= 0):
             return 0
         return self.resource_manager.distribute_manager(inventaris_id , location , quantity, isDelete)
 
