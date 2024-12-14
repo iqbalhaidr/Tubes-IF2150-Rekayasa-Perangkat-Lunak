@@ -46,7 +46,7 @@ _Modul yang digunakan pada program ini_
 | 13523023 | Muhammad Aufa Farabi            | UIResource (Daftar Resource, Daftar Inventaris), ResourceControl, Inventaris, ResourceManager                |
 | 13523037 | Buege Mahara Putra              | Dokumen                                                                                                      |
 | 13523117 | Ferdin Arsenarendra Purtadi     | LogActivity, Report, ReportManager, ResourceControl, Inventaris                                              |
-| 13523111 | Muhammad Iqbal Haidar           | ReportManager, ResourceControl                                                                               |
+| 13523111 | Muhammad Iqbal Haidar           | ReportManager, ResourceControl, Dokumen                                                                      |
 
 ## Tabel Basis Data
 <table border="0" style="border-collapse: collapse; text-align: left;">
