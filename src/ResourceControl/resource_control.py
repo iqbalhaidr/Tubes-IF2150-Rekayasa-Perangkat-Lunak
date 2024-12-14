@@ -21,7 +21,7 @@ class ResourceControl:
 
     def update_resource_quantity(self, resource_id: int, new_quantity: int, add: bool):
         """Memperbarui jumlah sumber daya."""
-        if (new_quantity < 0):
+        if (new_quantity <= 0):
             return 0
         return self.resource_manager.add_or_subtract_resource_quantity(resource_id, new_quantity, add)
     
