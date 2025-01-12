@@ -1,5 +1,4 @@
-# IF2150 - Rekayasa Perangkat Lunak 2024
-> Tugas Besar - IF2150 - Rekayasa Perangkat Lunak 2024
+# Tugas Besar IF2150 Rekayasa Perangkat Lunak 2024
 
 ### Kelompok K01-G11
 | NIM      | Nama                            |
